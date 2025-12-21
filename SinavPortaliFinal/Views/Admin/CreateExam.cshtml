@@ -1,0 +1,21 @@
+﻿@model SinavPortaliFinal.Models.Exam
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+<div class="card p-4">
+    <h4>Yeni Sınav</h4>
+    <form method="post">
+        <label>Başlık</label>
+        <input type="text" name="Title" class="form-control mb-3" required />
+        <label>Süre (Dk)</label>
+        <input type="number" name="Duration" class="form-control mb-3" required />
+        <label>Ders</label>
+        <select name="CategoryId" class="form-select mb-3">
+            @foreach (var item in ViewBag.Dersler)
+            {
+                <option value="@item.Id">@item.Name</option>
+            }
+        </select>
+        <button class="btn btn-success">Kaydet</button>
+    </form>
+</div>

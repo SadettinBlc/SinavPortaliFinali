@@ -1,0 +1,70 @@
+﻿@{
+    ViewData["Title"] = "Ana Sayfa";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <h2 class="mb-4 text-dark fw-bold">Hoş Geldiniz!</h2>
+
+    <div class="row g-4">
+        <div class="col-md-3">
+            <div class="card text-white bg-primary h-100 shadow-sm border-0">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase mb-1">Toplam Ders</h6>
+                            <h2 class="display-4 fw-bold mb-0">@ViewBag.CategoryCount</h2>
+                        </div>
+                        <i class="fa-solid fa-book fa-3x opacity-50"></i>
+                    </div>
+                </div>
+                <a href="/Admin/Categories" class="card-footer text-white bg-transparent border-0 text-end">Git <i class="fa-solid fa-arrow-right"></i></a>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card text-white bg-success h-100 shadow-sm border-0">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase mb-1">Sınavlar</h6>
+                            <h2 class="display-4 fw-bold mb-0">@ViewBag.ExamCount</h2>
+                        </div>
+                        <i class="fa-solid fa-pen-to-square fa-3x opacity-50"></i>
+                    </div>
+                </div>
+                <a href="/Admin/Exams" class="card-footer text-white bg-transparent border-0 text-end">Git <i class="fa-solid fa-arrow-right"></i></a>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card text-white bg-warning h-100 shadow-sm border-0">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase mb-1">Soru Bankası</h6>
+                            <h2 class="display-4 fw-bold mb-0">@ViewBag.QuestionCount</h2>
+                        </div>
+                        <i class="fa-solid fa-circle-question fa-3x opacity-50"></i>
+                    </div>
+                </div>
+                <a href="/Admin/Questions" class="card-footer text-white bg-transparent border-0 text-end">Git <i class="fa-solid fa-arrow-right"></i></a>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card text-white bg-danger h-100 shadow-sm border-0">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase mb-1">Kullanıcılar</h6>
+                            <h2 class="display-4 fw-bold mb-0">@ViewBag.UserCount</h2>
+                        </div>
+                        <i class="fa-solid fa-users fa-3x opacity-50"></i>
+                    </div>
+                </div>
+                <a href="/Admin/Users" class="card-footer text-white bg-transparent border-0 text-end">Yönet <i class="fa-solid fa-arrow-right"></i></a>
+            </div>
+        </div>
+    </div>
+</div>

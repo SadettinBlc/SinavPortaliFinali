@@ -1,0 +1,32 @@
+﻿@model List<SinavPortaliFinal.Models.AppUser>
+@{
+    ViewData["Title"] = "Personel"; Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="card shadow-sm">
+    <div class="card-header bg-dark text-white d-flex justify-content-between">
+        <h5 class="mb-0">Personel Yönetimi</h5>
+        <a href="/Admin/CreateUser" class="btn btn-light btn-sm text-dark fw-bold">Yeni Ekle</a>
+    </div>
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead><tr><th>Resim</th><th>Ad Soyad</th><th>Kullanıcı Adı</th><th>İşlem</th></tr></thead>
+            <tbody>
+                @foreach (var x in Model)
+                {
+                    <tr>
+                        <td><img src="@(x.ProfileImageUrl ?? "/img/default-user.png")" width="30" class="rounded-circle"></td>
+                        <td>@x.Name @x.Surname</td>
+                        <td>@x.UserName</td>
+                        <td>
+                            @if (User.Identity.Name != x.UserName)
+                            {
+                                <button class="btn btn-danger btn-sm btn-sil" data-id="@x.Id" data-url="/Admin/DeleteUserAjax"><i class="fa fa-trash"></i></button>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

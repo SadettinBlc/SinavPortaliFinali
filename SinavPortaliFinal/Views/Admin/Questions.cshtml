@@ -1,0 +1,52 @@
+﻿@model List<SinavPortaliFinal.Models.Question>
+@{
+    ViewData["Title"] = "Sorular"; Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="card shadow-sm">
+    <div class="card-header bg-warning text-dark">
+        <form action="/Admin/Questions" method="get" class="d-flex gap-2">
+            <select name="examId" class="form-select" onchange="this.form.submit()">
+                <option value="">-- Sınav Seç --</option>
+                @foreach (var e in ViewBag.Exams)
+                {
+                    if (ViewBag.SelectedExamId != null && (int)ViewBag.SelectedExamId == e.Id)
+                    {
+                        <option value="@e.Id" selected>@e.Title</option>
+                    }
+                    else
+                    {
+                        <option value="@e.Id">@e.Title</option>
+                    }
+                }
+            </select>
+            @if (ViewBag.SelectedExamId != null)
+            {
+                <a href="/Admin/CreateQuestion/@ViewBag.SelectedExamId" class="btn btn-dark text-nowrap">Soru Ekle</a>
+            }
+        </form>
+    </div>
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead><tr><th>#</th><th>Soru</th><th>Cevap</th><th>İşlem</th></tr></thead>
+            <tbody>
+                @{
+                    int k = 0;
+                }
+                @foreach (var x in Model)
+                {
+                    k++;
+                    <tr>
+                        <td>@k</td>
+                        <td>@x.QuestionText</td>
+                        <td class="fw-bold text-success">@x.CorrectAnswer</td>
+                        <td>
+                            <a href="/Admin/UpdateQuestion/@x.Id" class="btn btn-warning btn-sm"><i class="fa fa-pen"></i></a>
+                            <button class="btn btn-danger btn-sm btn-sil" data-id="@x.Id" data-url="/Admin/DeleteQuestionAjax"><i class="fa fa-trash"></i></button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

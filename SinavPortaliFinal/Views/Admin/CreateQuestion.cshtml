@@ -1,0 +1,41 @@
+﻿@model SinavPortaliFinal.Models.Question
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+<div class="card p-4">
+    <h4>Soru Ekle</h4>
+    <form method="post">
+        @if (ViewBag.SelectedExamId != null)
+        {
+            <input type="hidden" name="ExamId" value="@ViewBag.SelectedExamId">
+        }
+        else
+        {
+            <label>Sınav</label>
+            <select name="ExamId" class="form-select mb-3">
+                @foreach (var item in ViewBag.Sinavlar)
+                {
+                    <option value="@item.Id">@item.Title</option>
+                }
+            </select>
+        }
+        <label>Soru Metni</label>
+        <textarea name="QuestionText" class="form-control mb-3" required></textarea>
+
+        <div class="row">
+            <div class="col-6"><input type="text" name="OptionA" placeholder="A Şıkkı" class="form-control mb-2" required></div>
+            <div class="col-6"><input type="text" name="OptionB" placeholder="B Şıkkı" class="form-control mb-2" required></div>
+            <div class="col-6"><input type="text" name="OptionC" placeholder="C Şıkkı" class="form-control mb-2" required></div>
+            <div class="col-6"><input type="text" name="OptionD" placeholder="D Şıkkı" class="form-control mb-2" required></div>
+        </div>
+
+        <label>Doğru Cevap</label>
+        <select name="CorrectAnswer" class="form-select mb-3 w-25">
+            <option value="A">A</option>
+            <option value="B">B</option>
+            <option value="C">C</option>
+            <option value="D">D</option>
+        </select>
+        <button class="btn btn-primary">Kaydet</button>
+    </form>
+</div>
