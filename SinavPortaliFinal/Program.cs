@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using SinavPortaliFinal.Models;
+using SinavPortaliFinal.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,6 +18,9 @@ builder.Services.AddIdentity<AppUser, AppRole>(options =>
     options.Password.RequireLowercase = false;
 })
 .AddEntityFrameworkStores<AppDbContext>();
+
+// REPOSITORY SERVÝSLERÝ
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
 // 3. MVC
 builder.Services.AddControllersWithViews();
