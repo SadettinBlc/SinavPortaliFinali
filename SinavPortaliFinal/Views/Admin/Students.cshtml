@@ -1,0 +1,52 @@
+﻿@model IList<SinavPortaliFinal.Models.AppUser>
+@{
+    ViewData["Title"] = "Öğrenciler"; Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="card shadow-sm">
+    <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Öğrenci Listesi</h5>
+        <a href="/Admin/CreateStudent" class="btn btn-light btn-sm text-danger fw-bold">Yeni Öğrenci</a>
+    </div>
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0 align-middle">
+            <thead class="table-light"><tr><th>#</th><th>Ad Soyad</th><th>Okul No</th><th>İşlem</th></tr></thead>
+            <tbody>
+                @{
+                    int i = 0;
+                }
+                @foreach (var x in Model)
+                {
+                    i++;
+                    <tr>
+                        <td>@i</td>
+                        <td class="fw-bold">@x.Name @x.Surname</td>
+                        <td><span class="badge bg-secondary">@x.UserName</span></td>
+                        <td>
+                            @if (User.IsInRole("Müdür"))
+                            {
+                                <a href="/Admin/UpdateStudent/@x.Id" class="btn btn-warning btn-sm text-white">
+                                    <i class="fa fa-pen"></i>
+                                </a>
+
+                                <a href="/Admin/AssignLesson/@x.Id" class="btn btn-info btn-sm text-white">
+                                    <i class="fa fa-tasks"></i>
+                                </a>
+
+                                <button class="btn btn-danger btn-sm btn-sil"
+                                        data-id="@x.Id"
+                                        data-url="/Admin/DeleteStudentAjax">
+                                    <i class="fa fa-trash"></i>
+                                </button>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">Yetki Yok</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

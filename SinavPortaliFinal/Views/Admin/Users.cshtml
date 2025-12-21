@@ -4,24 +4,34 @@
 }
 
 <div class="card shadow-sm">
-    <div class="card-header bg-dark text-white d-flex justify-content-between">
+    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
         <h5 class="mb-0">Personel Yönetimi</h5>
-        <a href="/Admin/CreateUser" class="btn btn-light btn-sm text-dark fw-bold">Yeni Ekle</a>
+        <a href="/Admin/CreateUser" class="btn btn-light btn-sm text-dark fw-bold">Yeni Personel</a>
     </div>
     <div class="card-body p-0">
-        <table class="table table-hover mb-0">
-            <thead><tr><th>Resim</th><th>Ad Soyad</th><th>Kullanıcı Adı</th><th>İşlem</th></tr></thead>
+        <table class="table table-hover mb-0 align-middle">
+            <thead class="table-light"><tr><th>Resim</th><th>Ad Soyad</th><th>Kullanıcı Adı</th><th>İşlem</th></tr></thead>
             <tbody>
                 @foreach (var x in Model)
                 {
                     <tr>
-                        <td><img src="@(x.ProfileImageUrl ?? "/img/default-user.png")" width="30" class="rounded-circle"></td>
-                        <td>@x.Name @x.Surname</td>
+                        <td><img src="@(x.ProfileImageUrl ?? "/img/default-user.png")" width="35" class="rounded-circle border"></td>
+                        <td class="fw-bold">@x.Name @x.Surname</td>
                         <td>@x.UserName</td>
                         <td>
-                            @if (User.Identity.Name != x.UserName)
+                            <a href="/Admin/UpdateUser/@x.Id" class="btn btn-warning btn-sm text-white"><i class="fa fa-pen"></i></a>
+                           
+                            <a href="/Admin/AssignLesson/@x.Id" class="btn btn-info btn-sm text-white" title="Ders Ata">
+                                <i class="fa fa-tasks"></i>
+                            </a>
+
+                            @if (User.Identity?.Name != x.UserName)
                             {
-                                <button class="btn btn-danger btn-sm btn-sil" data-id="@x.Id" data-url="/Admin/DeleteUserAjax"><i class="fa fa-trash"></i></button>
+                                <button class="btn btn-danger btn-sm btn-sil"
+                                        data-id="@x.Id"
+                                        data-url="/Admin/DeleteUserAjax">
+                                    <i class="fa fa-trash"></i>
+                                </button>
                             }
                         </td>
                     </tr>

@@ -1,0 +1,17 @@
+﻿@model SinavPortaliFinal.Models.Question
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+<div class="card p-4">
+    <h4>Soruyu Düzenle</h4><form method="post">
+        <input type="hidden" name="Id" value="@Model.Id" /><input type="hidden" name="ExamId" value="@Model.ExamId" />
+        <label>Soru</label><textarea name="QuestionText" class="form-control mb-3" required>@Model.QuestionText</textarea>
+        <div class="row"><div class="col-6"><input type="text" name="OptionA" value="@Model.OptionA" class="form-control mb-2"></div><div class="col-6"><input type="text" name="OptionB" value="@Model.OptionB" class="form-control mb-2"></div><div class="col-6"><input type="text" name="OptionC" value="@Model.OptionC" class="form-control mb-2"></div><div class="col-6"><input type="text" name="OptionD" value="@Model.OptionD" class="form-control mb-2"></div></div>
+        <label>Doğru Cevap</label><select name="CorrectAnswer" class="form-select mb-3 w-25">
+            <option value="A" selected="@(Model.CorrectAnswer == "A")">A</option>
+            <option value="B" selected="@(Model.CorrectAnswer == "B")">B</option>
+            <option value="C" selected="@(Model.CorrectAnswer == "C")">C</option>
+            <option value="D" selected="@(Model.CorrectAnswer == "D")">D</option>
+        </select><button class="btn btn-warning w-100">Güncelle</button>
+    </form>
+</div>

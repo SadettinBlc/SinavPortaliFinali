@@ -99,14 +99,22 @@
             </div>
             <ul class="list-unstyled components">
                 <li><a href="/Admin/Index"><i class="fa-solid fa-gauge me-2"></i>Dashboard</a></li>
-                <li><a href="/Admin/Categories"><i class="fa-solid fa-book me-2"></i>Dersler</a></li>
+                @if (User.IsInRole("Müdür"))
+                {
+                    <li class="nav-item">
+                        <a class="nav-link" href="/Admin/Categories">
+                            <i class="fas fa-list"></i>
+                            <span>Dersler</span>
+                        </a>
+                    </li>
+                }
                 <li><a href="/Admin/Exams"><i class="fa-solid fa-pen-to-square me-2"></i>Sınavlar</a></li>
-                <li><a href="/Admin/Questions"><i class="fa-solid fa-circle-question me-2"></i>Sorular</a></li>
+                <li><a href="/Admin/Students"><i class="fa-solid fa-user-graduate me-2"></i>Öğrenciler</a></li>
 
                 @if (User.IsInRole("Müdür"))
                 {
                     <li><hr class="text-secondary mx-3"></li>
-                    <li><a href="/Admin/Users"><i class="fa-solid fa-users-gear me-2"></i>Kullanıcılar</a></li>
+                    <li><a href="/Admin/Users"><i class="fa-solid fa-users-gear me-2"></i>Personel</a></li>
                 }
             </ul>
         </nav>
@@ -121,3 +129,46 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>
 </html>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    $(document).ready(function () {
+        // SİLME İŞLEMİ (AJAX)
+        $(document).on('click', '.btn-sil', function () {
+            var btn = $(this);
+            var id = btn.data("id");
+            var url = btn.data("url");
+            var row = btn.closest("tr");
+
+            Swal.fire({
+                title: 'Emin misiniz?',
+                text: "Bu kayıt kalıcı olarak silinecek!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Evet, Sil!',
+                cancelButtonText: 'Vazgeç'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        type: "POST",
+                        url: url,
+                        data: { id: id },
+                        success: function (response) {
+                            if (response.success) {
+                                Swal.fire('Silindi!', 'Kayıt başarıyla silindi.', 'success');
+                                row.fadeOut(500, function () { $(this).remove(); });
+                            } else {
+                                Swal.fire('Hata!', 'Silme işlemi başarısız.', 'error');
+                            }
+                        },
+                        error: function () {
+                            Swal.fire('Hata!', 'Sunucu hatası oluştu.', 'error');
+                        }
+                    });
+                }
+            });
+        });
+    });
+</script>

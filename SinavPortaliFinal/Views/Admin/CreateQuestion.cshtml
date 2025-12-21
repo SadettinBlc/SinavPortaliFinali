@@ -1,41 +1,79 @@
 ﻿@model SinavPortaliFinal.Models.Question
+
 @{
+    ViewData["Title"] = "Soru Ekle";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
-<div class="card p-4">
-    <h4>Soru Ekle</h4>
-    <form method="post">
-        @if (ViewBag.SelectedExamId != null)
-        {
-            <input type="hidden" name="ExamId" value="@ViewBag.SelectedExamId">
-        }
-        else
-        {
-            <label>Sınav</label>
-            <select name="ExamId" class="form-select mb-3">
-                @foreach (var item in ViewBag.Sinavlar)
-                {
-                    <option value="@item.Id">@item.Title</option>
-                }
-            </select>
-        }
-        <label>Soru Metni</label>
-        <textarea name="QuestionText" class="form-control mb-3" required></textarea>
 
-        <div class="row">
-            <div class="col-6"><input type="text" name="OptionA" placeholder="A Şıkkı" class="form-control mb-2" required></div>
-            <div class="col-6"><input type="text" name="OptionB" placeholder="B Şıkkı" class="form-control mb-2" required></div>
-            <div class="col-6"><input type="text" name="OptionC" placeholder="C Şıkkı" class="form-control mb-2" required></div>
-            <div class="col-6"><input type="text" name="OptionD" placeholder="D Şıkkı" class="form-control mb-2" required></div>
+<div class="container mt-4">
+    <div class="card shadow border-0">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0"><i class="fa fa-plus-circle"></i> Yeni Soru Ekle</h5>
         </div>
+        <div class="card-body">
 
-        <label>Doğru Cevap</label>
-        <select name="CorrectAnswer" class="form-select mb-3 w-25">
-            <option value="A">A</option>
-            <option value="B">B</option>
-            <option value="C">C</option>
-            <option value="D">D</option>
-        </select>
-        <button class="btn btn-primary">Kaydet</button>
-    </form>
+            <form method="post" asp-action="CreateQuestion">
+
+                <div class="alert alert-info d-flex align-items-center mb-4">
+                    <i class="fa-solid fa-circle-info fa-2x me-3"></i>
+                    <div>
+                        <h6 class="fw-bold mb-0">Sınav Bilgisi</h6>
+                        <span>Şu anda <strong class="text-decoration-underline">@(ViewBag.ExamName ?? "Seçili Sınav")</strong> için soru oluşturuyorsunuz.</span>
+                    </div>
+                </div>
+
+                <input type="hidden" name="ExamId" value="@ViewBag.SelectedExamId" />
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Soru Metni</label>
+                    <textarea name="QuestionText" class="form-control" rows="4" placeholder="Soruyu buraya yazınız..." required></textarea>
+                </div>
+
+                <label class="form-label fw-bold">Şıklar</label>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <div class="input-group">
+                            <span class="input-group-text fw-bold bg-light">A</span>
+                            <input type="text" name="OptionA" class="form-control" placeholder="A Şıkkı" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="input-group">
+                            <span class="input-group-text fw-bold bg-light">B</span>
+                            <input type="text" name="OptionB" class="form-control" placeholder="B Şıkkı" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="input-group">
+                            <span class="input-group-text fw-bold bg-light">C</span>
+                            <input type="text" name="OptionC" class="form-control" placeholder="C Şıkkı" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="input-group">
+                            <span class="input-group-text fw-bold bg-light">D</span>
+                            <input type="text" name="OptionD" class="form-control" placeholder="D Şıkkı" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row align-items-end">
+                    <div class="col-md-4 mb-3 mb-md-0">
+                        <label class="form-label fw-bold">Doğru Cevap</label>
+                        <select name="CorrectAnswer" class="form-select bg-light border-primary">
+                            <option value="A">A</option>
+                            <option value="B">B</option>
+                            <option value="C">C</option>
+                            <option value="D">D</option>
+                        </select>
+                    </div>
+                    <div class="col-md-8 text-end">
+                        <a href="/Admin/Questions?examId=@ViewBag.SelectedExamId" class="btn btn-secondary me-2">İptal</a>
+                        <button type="submit" class="btn btn-success px-5 fw-bold"><i class="fa fa-save"></i> Kaydet</button>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+    </div>
 </div>

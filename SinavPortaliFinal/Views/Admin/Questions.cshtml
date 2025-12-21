@@ -1,52 +1,87 @@
-﻿@model List<SinavPortaliFinal.Models.Question>
+﻿@using SinavPortaliFinal.Models
+@model List<Question>
+
 @{
-    ViewData["Title"] = "Sorular"; Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "Sorular";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
-<div class="card shadow-sm">
-    <div class="card-header bg-warning text-dark">
-        <form action="/Admin/Questions" method="get" class="d-flex gap-2">
-            <select name="examId" class="form-select" onchange="this.form.submit()">
-                <option value="">-- Sınav Seç --</option>
-                @foreach (var e in ViewBag.Exams)
-                {
-                    if (ViewBag.SelectedExamId != null && (int)ViewBag.SelectedExamId == e.Id)
+<div class="container-fluid mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-dark mb-1">
+                <i class="fa-solid fa-list-check me-2 text-warning"></i>Sorular
+            </h2>
+            <span class="badge bg-primary fs-6 mt-1">
+                <i class="fa fa-tag me-1"></i> Sınav: @(ViewBag.ExamName ?? "Bilinmeyen Sınav")
+            </span>
+        </div>
+
+        <div>
+            <a href="/Admin/Exams" class="btn btn-secondary me-2">
+                <i class="fa fa-arrow-left"></i> Sınavlara Dön
+            </a>
+
+            <a href="/Admin/CreateQuestion?id=@ViewBag.SelectedExamId" class="btn btn-success fw-bold">
+                <i class="fa fa-plus"></i> Yeni Soru Ekle
+            </a>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0 align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 50px;">#</th>
+                        <th style="width: 50%;">Soru Metni</th>
+                        <th class="text-center">Doğru Cevap</th>
+                        <th class="text-end">İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
                     {
-                        <option value="@e.Id" selected>@e.Title</option>
+                        int i = 0;
+                        foreach (var item in Model)
+                        {
+                            i++;
+                            <tr>
+                                <td class="fw-bold text-muted text-center">@i</td>
+                                <td>
+                                    <div style="max-height: 60px; overflow: hidden; text-overflow: ellipsis;">
+                                        @item.QuestionText
+                                    </div>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge bg-success rounded-pill px-3">@item.CorrectAnswer</span>
+                                </td>
+                                <td class="text-end">
+                                    <a href="/Admin/UpdateQuestion/@item.Id" class="btn btn-warning btn-sm text-white" title="Düzenle">
+                                        <i class="fa fa-pen"></i>
+                                    </a>
+                                    <button class="btn btn-danger btn-sm btn-sil"
+                                            data-id="@item.Id"
+                                            data-url="/Admin/DeleteQuestionAjax" title="Sil">
+                                        <i class="fa fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        }
                     }
                     else
                     {
-                        <option value="@e.Id">@e.Title</option>
+                        <tr>
+                            <td colspan="4" class="text-center py-5 text-muted">
+                                <i class="fa-solid fa-folder-open fa-3x mb-3 opacity-50"></i>
+                                <p class="mb-0 fw-bold">Bu sınava ait henüz soru eklenmemiş.</p>
+                                <small>Yukarıdaki 'Yeni Soru Ekle' butonunu kullanabilirsiniz.</small>
+                            </td>
+                        </tr>
                     }
-                }
-            </select>
-            @if (ViewBag.SelectedExamId != null)
-            {
-                <a href="/Admin/CreateQuestion/@ViewBag.SelectedExamId" class="btn btn-dark text-nowrap">Soru Ekle</a>
-            }
-        </form>
-    </div>
-    <div class="card-body p-0">
-        <table class="table table-hover mb-0">
-            <thead><tr><th>#</th><th>Soru</th><th>Cevap</th><th>İşlem</th></tr></thead>
-            <tbody>
-                @{
-                    int k = 0;
-                }
-                @foreach (var x in Model)
-                {
-                    k++;
-                    <tr>
-                        <td>@k</td>
-                        <td>@x.QuestionText</td>
-                        <td class="fw-bold text-success">@x.CorrectAnswer</td>
-                        <td>
-                            <a href="/Admin/UpdateQuestion/@x.Id" class="btn btn-warning btn-sm"><i class="fa fa-pen"></i></a>
-                            <button class="btn btn-danger btn-sm btn-sil" data-id="@x.Id" data-url="/Admin/DeleteQuestionAjax"><i class="fa fa-trash"></i></button>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>

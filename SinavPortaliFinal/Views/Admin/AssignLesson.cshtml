@@ -1,0 +1,49 @@
+﻿@model List<SinavPortaliFinal.Models.AssignCategoryViewModel>
+
+@{
+    ViewData["Title"] = "Ders Atama";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Ders Atama: @ViewBag.UserName</h5>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Seç</th>
+                            <th>Ders Adı</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (int i = 0; i < Model.Count; i++)
+                        {
+                            <tr>
+                                <td style="width: 50px;">
+                                    <input type="checkbox" asp-for="@Model[i].Exists" class="form-check-input" style="transform: scale(1.3);" />
+
+                                    <input type="hidden" asp-for="@Model[i].CategoryId" />
+                                    <input type="hidden" asp-for="@Model[i].CategoryName" />
+                                </td>
+                                <td>
+                                    <label class="form-check-label fw-bold">
+                                        @Model[i].CategoryName
+                                    </label>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+                <div class="d-grid gap-2">
+                    <button class="btn btn-success p-3 fw-bold">Değişiklikleri Kaydet</button>
+                    <a href="/Admin/Index" class="btn btn-outline-secondary">İptal</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

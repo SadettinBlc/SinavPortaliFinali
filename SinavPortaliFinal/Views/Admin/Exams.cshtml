@@ -4,29 +4,33 @@
 }
 
 <div class="card shadow-sm">
-    <div class="card-header bg-success text-white d-flex justify-content-between">
-        <h5 class="mb-0">Sınavlar</h5>
+    <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Sınav Listesi</h5>
         <a href="/Admin/CreateExam" class="btn btn-light btn-sm text-success fw-bold">Yeni Sınav</a>
     </div>
     <div class="card-body p-0">
-        <table class="table table-hover mb-0">
-            <thead><tr><th>#</th><th>Başlık</th><th>Süre</th><th>Ders</th><th>İşlem</th></tr></thead>
+        <table class="table table-hover mb-0 align-middle">
+            <thead class="table-light"><tr><th>#</th><th>Başlık</th><th>Süre</th><th>Ders</th><th>İşlem</th></tr></thead>
             <tbody>
                 @{
-                    int j = 0;
+                    int i = 0;
                 }
                 @foreach (var x in Model)
                 {
-                    j++;
+                    i++;
                     <tr>
-                        <td>@j</td>
-                        <td>@x.Title</td>
+                        <td>@i</td>
+                        <td class="fw-bold">@x.Title</td>
                         <td>@x.Duration Dk</td>
-                        <td>@x.Category?.Name</td>
+                        <td><span class="badge bg-secondary">@x.Category?.Name</span></td>
                         <td>
                             <a href="/Admin/Questions?examId=@x.Id" class="btn btn-info btn-sm text-white">Sorular</a>
-                            <a href="/Admin/UpdateExam/@x.Id" class="btn btn-warning btn-sm"><i class="fa fa-pen"></i></a>
-                            <button class="btn btn-danger btn-sm btn-sil" data-id="@x.Id" data-url="/Admin/DeleteExamAjax"><i class="fa fa-trash"></i></button>
+                            <a href="/Admin/UpdateExam/@x.Id" class="btn btn-warning btn-sm text-white"><i class="fa fa-pen"></i></a>
+                            <button class="btn btn-danger btn-sm btn-sil"
+                                    data-id="@x.Id"
+                                    data-url="/Admin/DeleteExamAjax">
+                                <i class="fa fa-trash"></i>
+                            </button>
                         </td>
                     </tr>
                 }

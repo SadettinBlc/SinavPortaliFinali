@@ -14,5 +14,8 @@ namespace SinavPortaliFinal.Models
 
         [Display(Name = "Profil Resmi")]
         public string? ProfileImageUrl { get; set; }
+        
+        public List<UserCategory> UserCategories { get; set; }
     }
+
 }

@@ -14,5 +14,6 @@ namespace SinavPortaliFinal.Models
         public DbSet<Exam> Exams { get; set; }
         public DbSet<Question> Questions { get; set; }
         public DbSet<ExamResult> ExamResults { get; set; }
+        public DbSet<UserCategory> UserCategories { get; set; }
     }
 }

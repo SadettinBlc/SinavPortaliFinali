@@ -16,5 +16,7 @@ namespace SinavPortaliFinal.Models
 
         // Bir dersin çok sınavı olabilir
         public virtual ICollection<Exam> Exams { get; set; } = new List<Exam>();
+
+            public List<UserCategory> UserCategories { get; set; }
     }
 }

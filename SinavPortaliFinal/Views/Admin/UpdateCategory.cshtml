@@ -1,0 +1,12 @@
+﻿@model SinavPortaliFinal.Models.Category
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+<div class="card p-4">
+    <h4>Dersi Düzenle</h4><form method="post">
+        <input type="hidden" name="Id" value="@Model.Id" />
+        <label>Ders Adı</label><input type="text" name="Name" value="@Model.Name" class="form-control mb-3" required />
+        <label>Açıklama</label><textarea name="Description" class="form-control mb-3">@Model.Description</textarea>
+        <button class="btn btn-warning w-100">Güncelle</button>
+    </form>
+</div>

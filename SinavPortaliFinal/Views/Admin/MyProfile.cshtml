@@ -1,0 +1,73 @@
+﻿@model SinavPortaliFinal.Models.AppUser
+@{
+    ViewData["Title"] = "Profilim";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow-lg border-0">
+            <div class="card-header bg-dark text-white text-center py-4">
+                <h4 class="mb-0">Profil Bilgilerim</h4>
+            </div>
+            <div class="card-body p-4">
+                <form method="post" enctype="multipart/form-data">
+                    <input type="hidden" name="Id" value="@Model.Id" />
+
+                    <div class="text-center mb-4">
+                        <div class="position-relative d-inline-block">
+                            <img src="@(Model.ProfileImageUrl ?? "/img/default-user.png")"
+                                 class="rounded-circle border border-3 border-white shadow-sm"
+                                 style="width: 130px; height: 130px; object-fit: cover;" />
+
+                            <label for="fileUpload" class="position-absolute bottom-0 end-0 bg-primary text-white rounded-circle p-2 shadow-sm" style="cursor: pointer;">
+                                <i class="fa-solid fa-camera"></i>
+                            </label>
+                            <input type="file" id="fileUpload" name="file" class="d-none" accept="image/*" onchange="previewImage(this)">
+                        </div>
+                        <h5 class="mt-3 fw-bold">@Model.Name @Model.Surname</h5>
+                        <span class="badge bg-secondary">@User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value</span>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Ad</label>
+                            <input type="text" name="Name" value="@Model.Name" class="form-control" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Soyad</label>
+                            <input type="text" name="Surname" value="@Model.Surname" class="form-control" required />
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-bold">Kullanıcı Adı</label>
+                            <input type="text" name="UserName" value="@Model.UserName" class="form-control" required />
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-bold text-danger">Yeni Şifre</label>
+                            <input type="password" name="NewPassword" class="form-control" placeholder="Değiştirmek istemiyorsanız boş bırakın..." />
+                        </div>
+                    </div>
+
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-primary fw-bold py-2">
+                            <i class="fa-solid fa-floppy-disk me-2"></i> Değişiklikleri Kaydet
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Seçilen resmi anlık göstermek için basit script
+    function previewImage(input) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                document.querySelector('img').src = e.target.result;
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+</script>

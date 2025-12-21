@@ -1,30 +1,57 @@
-﻿@model List<SinavPortaliFinal.Models.Category>
+﻿@using SinavPortaliFinal.Models
+@model List<Category>
+
 @{
-    ViewData["Title"] = "Dersler"; Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "Categories";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
 <div class="card shadow-sm">
-    <div class="card-header bg-primary text-white d-flex justify-content-between">
-        <h5 class="mb-0">Dersler</h5>
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Ders Listesi</h5>
         <a href="/Admin/CreateCategory" class="btn btn-light btn-sm text-primary fw-bold">Yeni Ders</a>
     </div>
     <div class="card-body p-0">
-        <table class="table table-hover mb-0">
-            <thead><tr><th>#</th><th>Ders Adı</th><th>Açıklama</th><th>İşlem</th></tr></thead>
+        <table class="table table-hover mb-0 align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>#</th>
+                    <th>Ders Adı</th>
+                    <th>Açıklama</th>
+                    <th>İşlem</th>
+                </tr>
+            </thead>
             <tbody>
                 @{
                     int i = 0;
                 }
-                @foreach (var x in Model)
+                @if (Model != null)
                 {
-                    i++;
+                    @foreach (var x in Model)
+                    {
+                        i++;
+                        <tr>
+                            <td>@i</td>
+                            <td class="fw-bold">@x.Name</td>
+                            <td>@x.Description</td>
+                            <td>
+                                <a href="/Admin/UpdateCategory/@x.Id" class="btn btn-warning btn-sm text-white">
+                                    <i class="fa fa-pen"></i>
+                                </a>
+                                <button class="btn btn-danger btn-sm btn-sil"
+                                        data-id="@x.Id"
+                                        data-url="/Admin/DeleteCategoryAjax">
+                                    <i class="fa fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
                     <tr>
-                        <td>@i</td>
-                        <td>@x.Name</td>
-                        <td>@x.Description</td>
-                        <td>
-                            <a href="/Admin/UpdateCategory/@x.Id" class="btn btn-warning btn-sm"><i class="fa fa-pen"></i></a>
-                            <button class="btn btn-danger btn-sm btn-sil" data-id="@x.Id" data-url="/Admin/DeleteCategoryAjax"><i class="fa fa-trash"></i></button>
+                        <td colspan="4" class="text-center p-3">
+                            Listeniz boş veya veri çekilemedi.
                         </td>
                     </tr>
                 }
