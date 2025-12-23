@@ -1,0 +1,62 @@
+﻿@model SinavPortaliFinal.Models.AppUser
+
+@{
+    ViewData["Title"] = "Profilim";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container mt-4" style="max-width: 700px;">
+    <div class="card shadow border-0">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0"><i class="fa fa-user-circle me-2"></i>Profil Bilgilerim</h5>
+        </div>
+        <div class="card-body p-4">
+
+            <form method="post" action="/Student/MyProfile">
+
+                <div class="text-center mb-4">
+                    <img src="@(Model.ProfileImageUrl ?? "/img/default-user.png")"
+                         class="rounded-circle border border-3 border-primary shadow-sm"
+                         style="width: 120px; height: 120px; object-fit: cover;">
+                    <p class="text-muted mt-2 small">
+                        <i class="fa fa-info-circle"></i> Profil resmi sadece okul idaresi tarafından değiştirilebilir.
+                    </p>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold text-secondary">Ad</label>
+                        <input type="text" class="form-control bg-light" value="@Model.Name" disabled />
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold text-secondary">Soyad</label>
+                        <input type="text" class="form-control bg-light" value="@Model.Surname" disabled />
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-bold text-secondary">Kullanıcı Adı (Okul No)</label>
+                    <input type="text" class="form-control bg-light" value="@Model.UserName" disabled />
+                </div>
+
+                <hr class="my-4 text-muted">
+
+                <h6 class="text-primary fw-bold mb-3"><i class="fa fa-key me-2"></i>Şifre Değiştir</h6>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Yeni Şifre</label>
+                    <input type="text" name="NewPassword" class="form-control" placeholder="Şifrenizi değiştirmek istiyorsanız buraya yazın..." />
+                    <small class="text-muted">* Değiştirmek istemiyorsanız boş bırakın.</small>
+                </div>
+
+                <div class="d-grid mt-4">
+                    <button type="submit" class="btn btn-primary fw-bold py-2">
+                        <i class="fa fa-save me-2"></i> Değişiklikleri Kaydet
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,65 @@
+﻿@model List<SinavPortaliFinal.Models.Exam>
+
+@{
+    ViewData["Title"] = "Sınavlarım";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold text-dark">
+            <i class="fa-solid fa-graduation-cap me-2 text-primary"></i>Sınavlarım
+        </h2>
+        <span class="text-muted">Atandığınız Derslerin Sınavları</span>
+    </div>
+
+    @if (Model.Count == 0)
+    {
+        <div class="alert alert-warning text-center p-5 shadow-sm">
+            <i class="fa-solid fa-face-frown-open fa-3x mb-3"></i>
+            <h4>Henüz atanmış bir sınavınız yok.</h4>
+            <p>Müdürünüz size ders atadığında sınavlarınız burada görünecektir.</p>
+        </div>
+    }
+    else
+    {
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            @foreach (var item in Model)
+            {
+                <div class="col">
+                    <div class="card h-100 shadow-sm border-0 hover-effect">
+                        <div class="card-header bg-transparent border-0 pt-3 pb-0">
+                            <span class="badge bg-primary">
+                                @(item.Category != null ? item.Category.Name : "Genel")
+                            </span>
+                        </div>
+
+                        <div class="card-body">
+                            <h5 class="card-title fw-bold text-dark">@item.Title</h5> <div class="d-flex justify-content-between mt-3 text-secondary small">
+                                <span><i class="fa fa-clock me-1"></i> @item.Duration Dk</span>
+                            </div>
+                        </div>
+
+                        <div class="card-footer bg-transparent border-0 pb-3">
+                            <div class="d-grid">
+                                <a href="/Student/JoinExam/@item.Id" class="btn btn-success fw-bold">
+                                    <i class="fa fa-play me-2"></i> Sınava Başla
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<style>
+    .hover-effect {
+        transition: transform 0.2s;
+    }
+
+        .hover-effect:hover {
+            transform: translateY(-5px);
+        }
+</style>

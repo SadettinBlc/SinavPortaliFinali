@@ -1,0 +1,104 @@
+﻿@model SinavPortaliFinal.Models.Exam
+
+@{
+    ViewData["Title"] = Model.Title;
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container mt-4" style="max-width: 800px;">
+
+    <div class="card shadow-sm border-0 mb-4 border-start border-5 border-primary">
+        <div class="card-body">
+            <h3 class="fw-bold text-dark mb-1">@Model.Title</h3>
+            <div class="text-muted mb-2">
+                <span class="badge bg-primary me-2">@(Model.Category?.Name ?? "Genel")</span>
+                <i class="fa fa-clock me-1"></i> Süre: @Model.Duration Dakika
+            </div>
+            <div class="alert alert-info small mb-0">
+                <i class="fa fa-info-circle me-2"></i>
+                Lütfen tüm soruları dikkatlice okuyup cevaplayınız. Sınavı bitirmek için en alttaki butona basınız.
+            </div>
+        </div>
+    </div>
+
+    <form action="/Student/FinishExam" method="post">
+
+        <input type="hidden" name="examId" value="@Model.Id" />
+
+        @if (Model.Questions != null && Model.Questions.Count > 0)
+        {
+            int i = 0;
+            foreach (var q in Model.Questions)
+            {
+                i++;
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-header bg-white border-bottom-0 pt-3">
+                        <h5 class="fw-bold text-dark">
+                            <span class="badge bg-secondary me-2">Soru @i</span>
+                        </h5>
+                        <p class="lead mb-0 mt-2" style="font-size: 1.1rem;">@q.QuestionText</p>
+                    </div>
+                    <div class="card-body pt-0">
+                        <hr class="text-muted opacity-25">
+
+                        <div class="list-group">
+
+                            <label class="list-group-item list-group-item-action d-flex align-items-center cursor-pointer">
+                                <input class="form-check-input me-3" type="radio" name="answers[@q.Id]" value="A" required>
+                                <span class="fw-bold me-2">A)</span> @q.OptionA
+                            </label>
+
+                            <label class="list-group-item list-group-item-action d-flex align-items-center cursor-pointer">
+                                <input class="form-check-input me-3" type="radio" name="answers[@q.Id]" value="B" required>
+                                <span class="fw-bold me-2">B)</span> @q.OptionB
+                            </label>
+
+                            <label class="list-group-item list-group-item-action d-flex align-items-center cursor-pointer">
+                                <input class="form-check-input me-3" type="radio" name="answers[@q.Id]" value="C" required>
+                                <span class="fw-bold me-2">C)</span> @q.OptionC
+                            </label>
+
+                            <label class="list-group-item list-group-item-action d-flex align-items-center cursor-pointer">
+                                <input class="form-check-input me-3" type="radio" name="answers[@q.Id]" value="D" required>
+                                <span class="fw-bold me-2">D)</span> @q.OptionD
+                            </label>
+
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <div class="d-grid gap-2 mb-5">
+                <button type="submit" class="btn btn-success btn-lg fw-bold shadow">
+                    <i class="fa fa-check-circle me-2"></i> Sınavı Tamamla ve Gönder
+                </button>
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-warning text-center">
+                <i class="fa fa-exclamation-triangle fa-2x mb-3"></i>
+                <h4>Bu sınava henüz soru eklenmemiş!</h4>
+                <a href="/Student/Index" class="btn btn-secondary mt-2">Geri Dön</a>
+            </div>
+        }
+
+    </form>
+</div>
+
+<style>
+    .list-group-item:hover {
+        background-color: #f8f9fa;
+    }
+    /* Radyo butonu seçilince arka plan değişsin */
+    .form-check-input:checked + span + span,
+    .list-group-item:has(.form-check-input:checked) {
+        background-color: #e8f5e9; /* Açık yeşil */
+        border-color: #a5d6a7;
+        color: #1b5e20;
+    }
+
+    .cursor-pointer {
+        cursor: pointer;
+    }
+</style>

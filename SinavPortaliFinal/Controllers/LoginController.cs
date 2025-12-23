@@ -35,10 +35,10 @@ namespace SinavPortaliFinal.Controllers
                 var user = await _userManager.FindByNameAsync(username);
 
                 // Rolüne göre yönlendir
-                if (await _userManager.IsInRoleAsync(user, "Öğrenci"))
+                if (user != null && await _userManager.IsInRoleAsync(user, "Öğrenci"))
                 {
                     // Öğrenci Paneli (Henüz yapmadık ama yönlendirmesi hazır olsun)
-                    return RedirectToAction("Index", "StudentPanel");
+                    return RedirectToAction("Index", "Student");
                 }
 
                 // Müdür ve Öğretmen Admin Paneline gider

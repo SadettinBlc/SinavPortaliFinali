@@ -1,7 +1,7 @@
 ﻿@using Microsoft.AspNetCore.Identity
 @inject UserManager<SinavPortaliFinal.Models.AppUser> UserManager
 @{
-    // Giriş yapan kullanıcıyı buluyoruz (Resmini göstermek için)
+    // Giriş yapan kullanıcıyı buluyoruz
     var user = await UserManager.GetUserAsync(User);
 }
 
@@ -10,7 +10,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width" />
-    <title>@ViewData["Title"] - Yönetim Paneli</title>
+    <title>@ViewData["Title"] - Sınav Portalı</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
@@ -84,7 +84,15 @@
                     <span>@user?.Name @user?.Surname</span>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end shadow">
-                    <li><a class="dropdown-item" href="/Admin/MyProfile"><i class="fa-solid fa-user-gear me-2"></i>Profilim</a></li>
+                    @if (User.IsInRole("Öğrenci"))
+                    {
+                        <li><a class="dropdown-item" href="/Student/MyProfile"><i class="fa-solid fa-user-gear me-2"></i>Profilim</a></li>
+                    }
+                    else
+                    {
+                        <li><a class="dropdown-item" href="/Admin/MyProfile"><i class="fa-solid fa-user-gear me-2"></i>Profilim</a></li>
+                    }
+
                     <li><hr class="dropdown-divider"></li>
                     <li><a class="dropdown-item text-danger" href="/Login/Logout"><i class="fa-solid fa-right-from-bracket me-2"></i>Çıkış</a></li>
                 </ul>
@@ -95,27 +103,52 @@
     <div class="wrapper">
         <nav id="sidebar">
             <div class="sidebar-header">
-                <h5 class="mb-0">Yönetici Paneli</h5>
-            </div>
-            <ul class="list-unstyled components">
-                <li><a href="/Admin/Index"><i class="fa-solid fa-gauge me-2"></i>Dashboard</a></li>
-                @if (User.IsInRole("Müdür"))
+                @if (User.IsInRole("Öğrenci"))
                 {
-                    <li class="nav-item">
-                        <a class="nav-link" href="/Admin/Categories">
-                            <i class="fas fa-list"></i>
-                            <span>Dersler</span>
+                    <h5 class="mb-0">Öğrenci Paneli</h5>
+                }
+                else
+                {
+                    <h5 class="mb-0">Yönetici Paneli</h5>
+                }
+            </div>
+
+            <ul class="list-unstyled components">
+
+                @if (User.IsInRole("Müdür") || User.IsInRole("Öğretmen"))
+                {
+                    <li><a href="/Admin/Index"><i class="fa-solid fa-gauge me-2"></i>Dashboard</a></li>
+
+                    @if (User.IsInRole("Müdür"))
+                    {
+                        <li><a href="/Admin/Categories"><i class="fas fa-list me-2"></i>Dersler</a></li>
+                    }
+
+                    <li><a href="/Admin/Exams"><i class="fa-solid fa-pen-to-square me-2"></i>Sınavlar</a></li>
+                    <li><a href="/Admin/Exams"><i class="fas fa-circle-question me-2"></i>Sorular</a></li>
+                    <li><a href="/Admin/Students"><i class="fa-solid fa-user-graduate me-2"></i>Öğrenciler</a></li>
+
+                    @if (User.IsInRole("Müdür"))
+                    {
+                        <li><hr class="text-secondary mx-3"></li>
+                        <li><a href="/Admin/Users"><i class="fa-solid fa-users-gear me-2"></i>Personel</a></li>
+                    }
+                }
+
+                @if (User.IsInRole("Öğrenci"))
+                {
+                    <li>
+                        <a href="/Student/Index">
+                            <i class="fa-solid fa-book-open me-2"></i>Sınavlarım
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/Student/MyProfile">
+                            <i class="fa-solid fa-id-card me-2"></i>Profilim
                         </a>
                     </li>
                 }
-                <li><a href="/Admin/Exams"><i class="fa-solid fa-pen-to-square me-2"></i>Sınavlar</a></li>
-                <li><a href="/Admin/Students"><i class="fa-solid fa-user-graduate me-2"></i>Öğrenciler</a></li>
 
-                @if (User.IsInRole("Müdür"))
-                {
-                    <li><hr class="text-secondary mx-3"></li>
-                    <li><a href="/Admin/Users"><i class="fa-solid fa-users-gear me-2"></i>Personel</a></li>
-                }
             </ul>
         </nav>
 
@@ -127,48 +160,46 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-</body>
-</html>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-    $(document).ready(function () {
-        // SİLME İŞLEMİ (AJAX)
-        $(document).on('click', '.btn-sil', function () {
-            var btn = $(this);
-            var id = btn.data("id");
-            var url = btn.data("url");
-            var row = btn.closest("tr");
 
-            Swal.fire({
-                title: 'Emin misiniz?',
-                text: "Bu kayıt kalıcı olarak silinecek!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: 'Evet, Sil!',
-                cancelButtonText: 'Vazgeç'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.ajax({
-                        type: "POST",
-                        url: url,
-                        data: { id: id },
-                        success: function (response) {
-                            if (response.success) {
-                                Swal.fire('Silindi!', 'Kayıt başarıyla silindi.', 'success');
-                                row.fadeOut(500, function () { $(this).remove(); });
-                            } else {
-                                Swal.fire('Hata!', 'Silme işlemi başarısız.', 'error');
+    <script>
+        $(document).ready(function () {
+            $(document).on('click', '.btn-sil', function () {
+                var btn = $(this);
+                var id = btn.data("id");
+                var url = btn.data("url");
+                var row = btn.closest("tr");
+
+                Swal.fire({
+                    title: 'Emin misiniz?',
+                    text: "Bu kayıt kalıcı olarak silinecek!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Evet, Sil!',
+                    cancelButtonText: 'Vazgeç'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            type: "POST",
+                            url: url,
+                            data: { id: id },
+                            success: function (response) {
+                                if (response.success) {
+                                    Swal.fire('Silindi!', 'Kayıt başarıyla silindi.', 'success');
+                                    row.fadeOut(500, function () { $(this).remove(); });
+                                } else {
+                                    Swal.fire('Hata!', 'Silme işlemi başarısız.', 'error');
+                                }
+                            },
+                            error: function () {
+                                Swal.fire('Hata!', 'Sunucu hatası oluştu.', 'error');
                             }
-                        },
-                        error: function () {
-                            Swal.fire('Hata!', 'Sunucu hatası oluştu.', 'error');
-                        }
-                    });
-                }
+                        });
+                    }
+                });
             });
         });
-    });
-</script>
+    </script>
+</body>
+</html>
