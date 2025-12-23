@@ -4,7 +4,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SinavPortaliFinal.Models;
 using SinavPortaliFinal.Repositories;
-using System.IO; // Dosya işlemleri için
+using System.IO;
+using Microsoft.AspNetCore.SignalR;
+using SinavPortaliFinal.Hubs;
 
 namespace SinavPortaliFinal.Controllers
 {
@@ -16,19 +18,22 @@ namespace SinavPortaliFinal.Controllers
         private readonly IGenericRepository<Exam> _examRepo;
         private readonly IGenericRepository<Question> _questionRepo;
         private readonly UserManager<AppUser> _userManager;
-        private readonly AppDbContext _context; // Filtreleme işlemleri için
+        private readonly AppDbContext _context;
+        private readonly IHubContext<DashboardHub> _hubContext;
 
         public AdminController(IGenericRepository<Category> categoryRepo,
                                IGenericRepository<Exam> examRepo,
                                IGenericRepository<Question> questionRepo,
                                UserManager<AppUser> userManager,
-                               AppDbContext context)
+                               AppDbContext context,
+                               IHubContext<DashboardHub> hubContext)
         {
             _categoryRepo = categoryRepo;
             _examRepo = examRepo;
             _questionRepo = questionRepo;
             _userManager = userManager;
             _context = context;
+            _hubContext = hubContext;
         }
 
         // ==========================================
@@ -36,15 +41,68 @@ namespace SinavPortaliFinal.Controllers
         // ==========================================
         public async Task<IActionResult> Index()
         {
-            ViewBag.CategoryCount = _categoryRepo.GetAll().Count;
-            ViewBag.ExamCount = _examRepo.GetAll().Count;
-            ViewBag.QuestionCount = _questionRepo.GetAll().Count;
+            // --- ORTAK HESAPLAMA (Müdür de Öğretmen de Personel Sayısını Görsün) ---
+            // Okuldaki toplam öğrenci sayısı
+            var allStudentsList = await _userManager.GetUsersInRoleAsync("Öğrenci");
+            int totalStudentCount = allStudentsList.Count;
 
-            var students = await _userManager.GetUsersInRoleAsync("Öğrenci");
-            ViewBag.StudentCount = students.Count;
+            // Okuldaki toplam kullanıcı sayısı
+            var totalUserCount = _userManager.Users.Count();
 
-            var allUsers = _userManager.Users.Count();
-            ViewBag.StaffCount = allUsers - students.Count;
+            // Personel Sayısı = Toplam Kullanıcı - Öğrenciler
+            int totalStaffCount = totalUserCount - totalStudentCount;
+            // -----------------------------------------------------------------------
+
+            // MÜDÜR İSE: Her şeyi, tüm okulu görsün
+            if (User.IsInRole("Müdür"))
+            {
+                ViewBag.CategoryCount = _categoryRepo.GetAll().Count;
+                ViewBag.ExamCount = _examRepo.GetAll().Count;
+                ViewBag.QuestionCount = _questionRepo.GetAll().Count;
+
+                ViewBag.ResultCount = _context.ExamResults.Count();
+
+                ViewBag.StudentCount = totalStudentCount;
+                ViewBag.StaffCount = totalStaffCount; // Hesapladığımız sayıyı buraya veriyoruz
+            }
+            // ÖĞRETMEN İSE: Sadece kendi verilerini görsün
+            else if (User.IsInRole("Öğretmen"))
+            {
+                var teacherId = int.Parse(_userManager.GetUserId(User) ?? "0");
+
+                // 1. Ders Sayısı
+                var teacherCategoryIds = _context.UserCategories
+                                                 .Where(x => x.AppUserId == teacherId)
+                                                 .Select(x => x.CategoryId)
+                                                 .ToList();
+                ViewBag.CategoryCount = teacherCategoryIds.Count;
+
+                // 2. Sınav Sayısı
+                var myExams = _context.Exams.Where(x => teacherCategoryIds.Contains(x.CategoryId)).ToList();
+                ViewBag.ExamCount = myExams.Count;
+
+                // 3. Soru Sayısı
+                var myExamIds = myExams.Select(e => e.Id).ToList();
+                var myQuestions = _context.Questions.Where(q => myExamIds.Contains(q.ExamId)).Count();
+                ViewBag.QuestionCount = myQuestions;
+
+                // 4. Not Sayısı
+                var myResultCount = _context.ExamResults.Where(r => myExamIds.Contains(r.ExamId)).Count();
+                ViewBag.ResultCount = myResultCount;
+
+                // 5. Öğrenci Sayısı (Kendi Öğrencileri)
+                var myStudentCount = _context.UserCategories
+                                             .Where(x => teacherCategoryIds.Contains(x.CategoryId) && x.AppUserId != teacherId)
+                                             .Select(x => x.AppUserId)
+                                             .Distinct()
+                                             .Count();
+
+                ViewBag.StudentCount = myStudentCount;
+
+                // 6. Personel Sayısı (DÜZELTİLDİ)
+                // Artık 0 yerine gerçek personel sayısını görüyorlar
+                ViewBag.StaffCount = totalStaffCount;
+            }
 
             return View();
         }
@@ -147,10 +205,17 @@ namespace SinavPortaliFinal.Controllers
         }
 
         [HttpPost]
-        public IActionResult CreateExam(Exam p)
+        public async Task<IActionResult> CreateExam(Exam p)
         {
             p.CreatedDate = DateTime.Now;
             _examRepo.Add(p);
+
+            // --- SİNYAL GÖNDER (SIGNALR) ---
+            // Tüm bağlı kullanıcılara "SınavSayisiGuncelle" mesajı atıyoruz
+            var examCount = _examRepo.GetAll().Count;
+            await _hubContext.Clients.All.SendAsync("ReceiveExamCount", examCount);
+            // ----------------------------
+
             TempData["BasariliMesaj"] = "Sınav oluşturuldu.";
             return RedirectToAction("Exams");
         }
@@ -297,7 +362,7 @@ namespace SinavPortaliFinal.Controllers
 
             user.Name = p.Name; user.Surname = p.Surname; user.UserName = p.UserName;
 
-            // --- ŞİFRE DEĞİŞTİRME (Token Hatası Çözüldü) ---
+            // --- ŞİFRE DEĞİŞTİRME ---
             if (!string.IsNullOrEmpty(Password))
             {
                 if (await _userManager.HasPasswordAsync(user))
@@ -379,6 +444,12 @@ namespace SinavPortaliFinal.Controllers
             if (result.Succeeded)
             {
                 await _userManager.AddToRoleAsync(p, "Öğrenci");
+
+                // --- SİNYAL GÖNDER (SIGNALR) ---
+                var students = await _userManager.GetUsersInRoleAsync("Öğrenci");
+                await _hubContext.Clients.All.SendAsync("ReceiveStudentCount", students.Count);
+                // ----------------------------
+
                 TempData["BasariliMesaj"] = "Öğrenci eklendi.";
                 return RedirectToAction("Students");
             }
@@ -388,15 +459,35 @@ namespace SinavPortaliFinal.Controllers
 
         [HttpGet] public async Task<IActionResult> UpdateStudent(string id) => View(await _userManager.FindByIdAsync(id));
 
+        // ==========================================
+        //  ÖĞRENCİ DÜZENLEME (RESİM YÜKLEME EKLENDİ)
+        // ==========================================
         [HttpPost]
-        public async Task<IActionResult> UpdateStudent(AppUser p, string? Password)
+        public async Task<IActionResult> UpdateStudent(AppUser p, string? Password, IFormFile? file) // <-- file eklendi
         {
             var user = await _userManager.FindByIdAsync(p.Id.ToString());
             if (user == null) return NotFound();
 
+            // 1. RESİM YÜKLEME İŞLEMİ (YENİ)
+            if (file != null)
+            {
+                var ext = Path.GetExtension(file.FileName);
+                var name = Guid.NewGuid() + ext;
+
+                // Klasör yoksa oluştur
+                var folder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "img");
+                if (!Directory.Exists(folder)) Directory.CreateDirectory(folder);
+
+                var path = Path.Combine(folder, name);
+                using (var stream = new FileStream(path, FileMode.Create)) await file.CopyToAsync(stream);
+
+                user.ProfileImageUrl = "/img/" + name;
+            }
+
+            // 2. Bilgileri Güncelle
             user.Name = p.Name; user.Surname = p.Surname; user.UserName = p.UserName;
 
-            // --- ŞİFRE DEĞİŞTİRME (Token Hatası Çözüldü) ---
+            // 3. Şifre Değiştirme
             if (!string.IsNullOrEmpty(Password))
             {
                 if (await _userManager.HasPasswordAsync(user))
@@ -407,7 +498,7 @@ namespace SinavPortaliFinal.Controllers
             }
 
             await _userManager.UpdateAsync(user);
-            TempData["BasariliMesaj"] = "Öğrenci güncellendi.";
+            TempData["BasariliMesaj"] = "Öğrenci bilgileri güncellendi.";
             return RedirectToAction("Students");
         }
 
@@ -430,13 +521,12 @@ namespace SinavPortaliFinal.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return NotFound();
 
-            // --- RESİM YÜKLEME (Dizin hatası çözüldü) ---
+            // --- RESİM YÜKLEME ---
             if (file != null)
             {
                 var ext = Path.GetExtension(file.FileName);
                 var name = Guid.NewGuid() + ext;
 
-                // Güvenli klasör yolu birleştirme
                 var folder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "img");
                 if (!Directory.Exists(folder)) Directory.CreateDirectory(folder);
 
@@ -447,7 +537,7 @@ namespace SinavPortaliFinal.Controllers
 
             user.Name = p.Name; user.Surname = p.Surname; user.UserName = p.UserName;
 
-            // --- ŞİFRE DEĞİŞTİRME (Token Hatası Çözüldü) ---
+            // --- ŞİFRE DEĞİŞTİRME ---
             if (!string.IsNullOrEmpty(NewPassword))
             {
                 if (await _userManager.HasPasswordAsync(user))
@@ -473,6 +563,13 @@ namespace SinavPortaliFinal.Controllers
             var user = await _userManager.FindByIdAsync(id.ToString());
             if (user == null) return NotFound();
 
+            // --- GARANTİ YÖNTEM ---
+            // Link adresi göndermek yerine direkt durumu (true/false) gönderiyoruz.
+            // Böylece View tarafında hata olma şansı kalmıyor.
+            bool isStudent = await _userManager.IsInRoleAsync(user, "Öğrenci");
+            ViewBag.IsStudent = isStudent;
+            // ---------------------
+
             var allCategories = _categoryRepo.GetAll();
             var userCategories = _context.UserCategories
                                          .Where(x => x.AppUserId == id)
@@ -486,7 +583,7 @@ namespace SinavPortaliFinal.Controllers
                 model.Add(new AssignCategoryViewModel
                 {
                     CategoryId = item.Id,
-                    CategoryName = item.Name, // Modelindeki isim neyse o
+                    CategoryName = item.Name,
                     Exists = userCategories.Contains(item.Id)
                 });
             }
@@ -504,6 +601,7 @@ namespace SinavPortaliFinal.Controllers
             var user = await _userManager.FindByIdAsync(id.ToString());
             if (user == null) return NotFound();
 
+            // 1. Kayıt İşlemleri
             foreach (var item in model)
             {
                 if (item.Exists)
@@ -527,47 +625,81 @@ namespace SinavPortaliFinal.Controllers
                     }
                 }
             }
-
             await _context.SaveChangesAsync();
-            return RedirectToAction("Index");
+
+            // 2. AKILLI YÖNLENDİRME (YENİ)
+            // Kullanıcının rolüne bakıp geldiği sayfaya geri gönderiyoruz
+            var roles = await _userManager.GetRolesAsync(user);
+
+            if (roles.Contains("Öğrenci"))
+            {
+                TempData["BasariliMesaj"] = "Öğrenci ders atamaları güncellendi.";
+                return RedirectToAction("Students");
+            }
+            else
+            {
+                TempData["BasariliMesaj"] = "Personel ders atamaları güncellendi.";
+                return RedirectToAction("Users");
+            }
         }
+
         // ==========================================
         //          NOTLAR / SINAV SONUÇLARI
+        //       (FİLTRELEME ÖZELLİĞİ EKLENDİ)
         // ==========================================
-        public IActionResult ExamResults()
+        public IActionResult ExamResults(int? examId)
         {
-            // Tüm sonuçları getir (Öğrenci, Sınav ve Ders bilgileriyle)
-            var results = _context.ExamResults
-                                  .Include(x => x.AppUser)
-                                  .Include(x => x.Exam)
-                                  // DÜZELTME 1: e!.Category diyerek "Boş olsa da devam et" diyoruz
-                                  .ThenInclude(e => e!.Category)
-                                  .OrderByDescending(x => x.Date)
-                                  .ToList();
+            // 1. Sorguyu Hazırla (Henüz veritabanına gitmiyoruz, şablonu kuruyoruz)
+            var query = _context.ExamResults
+                                .Include(x => x.AppUser)
+                                .Include(x => x.Exam)
+                                .ThenInclude(e => e!.Category)
+                                .AsQueryable();
 
-            // 1. MÜDÜR İSE -> Hepsini görsün
+            // Dropdown (Seçim Kutusu) için sınav listesi hazırlayacağız
+            List<Exam> dropdownExams = new List<Exam>();
+
+            // 2. MÜDÜR İSE -> Tüm Sınavları Görebilir
             if (User.IsInRole("Müdür"))
             {
-                return View(results);
+                dropdownExams = _context.Exams.ToList();
+                // Müdür için ekstra bir kısıtlama yok, query aynen kalır.
             }
 
-            // 2. ÖĞRETMEN İSE -> Filtrele
-            if (User.IsInRole("Öğretmen"))
+            // 3. ÖĞRETMEN İSE -> Sadece Kendi Derslerinin Sınavları
+            else if (User.IsInRole("Öğretmen"))
             {
                 var teacherId = int.Parse(_userManager.GetUserId(User) ?? "0");
 
+                // Öğretmenin ders ID'leri
                 var teacherCategoryIds = _context.UserCategories
                                                  .Where(x => x.AppUserId == teacherId)
                                                  .Select(x => x.CategoryId)
                                                  .ToList();
 
-                // DÜZELTME 2: r.Exam!.CategoryId diyerek ünlem koyduk
-                var myResults = results.Where(r => r.Exam != null && teacherCategoryIds.Contains(r.Exam!.CategoryId)).ToList();
+                // Dropdown'a sadece hocanın sınavlarını koy
+                dropdownExams = _context.Exams
+                                        .Where(x => teacherCategoryIds.Contains(x.CategoryId))
+                                        .ToList();
 
-                return View(myResults);
+                // Sonuç listesini de sadece hocanın sınavlarıyla sınırla
+                query = query.Where(r => r.Exam != null && teacherCategoryIds.Contains(r.Exam!.CategoryId));
             }
 
-            return View(new List<ExamResult>());
+            // 4. EĞER BİR SINAV SEÇİLDİYSE -> FİLTRELE
+            if (examId.HasValue)
+            {
+                query = query.Where(r => r.ExamId == examId.Value);
+            }
+
+            // 5. Verileri Çek ve View'a Gönder
+            var results = query.OrderByDescending(x => x.Date).ToList();
+
+            // Sayfadaki Dropdown için verileri taşıyoruz
+            ViewBag.Exams = dropdownExams;
+            ViewBag.SelectedExamId = examId;
+
+            return View(results);
         }
     }
 }

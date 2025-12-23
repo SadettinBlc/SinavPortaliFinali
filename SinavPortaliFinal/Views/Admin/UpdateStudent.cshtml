@@ -13,9 +13,20 @@
         </div>
 
         <div class="card-body p-4">
-            <form method="post" action="/Admin/UpdateStudent">
+            <form method="post" action="/Admin/UpdateStudent" enctype="multipart/form-data">
 
                 <input type="hidden" name="Id" value="@Model.Id" />
+
+                <div class="mb-4 text-center">
+                    <img src="@(Model.ProfileImageUrl ?? "/img/default-user.png")"
+                         class="rounded-circle border border-3 border-danger shadow-sm mb-3"
+                         style="width: 100px; height: 100px; object-fit: cover;">
+
+                    <div class="text-start">
+                        <label class="form-label fw-bold text-secondary small">Profil Resmi Yükle</label>
+                        <input type="file" name="file" class="form-control" accept="image/*" />
+                    </div>
+                </div>
 
                 <div class="mb-3">
                     <label class="form-label text-secondary small">Ad</label>
@@ -35,16 +46,13 @@
                 <div class="mb-4">
                     <label class="form-label text-secondary small">Yeni Şifre</label>
                     <input type="text" name="Password" class="form-control" placeholder="Değiştirmek istemiyorsanız boş bırakın..." />
-                    <small class="text-muted fst-italic">* Şifreyi güncellemek istemiyorsanız bu alanı boş geçiniz.</small>
                 </div>
 
                 <div class="d-grid gap-2">
                     <button type="submit" class="btn btn-danger text-white py-2 fw-bold">
                         Öğrenciyi Güncelle
                     </button>
-                    <a href="/Admin/Students" class="btn btn-light text-secondary py-2">
-                        İptal
-                    </a>
+                    <a href="/Admin/Students" class="btn btn-light text-secondary py-2">İptal</a>
                 </div>
 
             </form>

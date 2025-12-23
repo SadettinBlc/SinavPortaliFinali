@@ -39,8 +39,7 @@ namespace SinavPortaliFinal.Controllers
                                   .Where(exam => assignedCategoryIds.Contains(exam.CategoryId))
                                   .ToList();
 
-            // 3. --- YENİ KISIM ---
-            // Öğrencinin daha önce girdiği sınavların ID'lerini buluyoruz
+            // 3. Öğrencinin daha önce girdiği sınavların ID'lerini buluyoruz
             var takenExamIds = _context.ExamResults
                                        .Where(x => x.AppUserId == user.Id)
                                        .Select(x => x.ExamId)
@@ -48,7 +47,6 @@ namespace SinavPortaliFinal.Controllers
 
             // Bu listeyi View tarafına gönderiyoruz ki butonu değiştirelim
             ViewBag.TakenExamIds = takenExamIds;
-            // ---------------------
 
             return View(myExams);
         }
@@ -73,7 +71,7 @@ namespace SinavPortaliFinal.Controllers
             // Sadece şifre alanı doluysa işlem yapıyoruz
             if (!string.IsNullOrEmpty(NewPassword))
             {
-                // Eski şifreyi sil, yenisini ekle (Token derdi olmadan)
+                // Eski şifreyi sil, yenisini ekle
                 if (await _userManager.HasPasswordAsync(user))
                 {
                     await _userManager.RemovePasswordAsync(user);
@@ -83,17 +81,14 @@ namespace SinavPortaliFinal.Controllers
 
                 if (result.Succeeded)
                 {
-                    // Güvenlik damgasını güncelle (Oturum güvenliği için)
+                    // Güvenlik damgasını güncelle
                     await _userManager.UpdateSecurityStampAsync(user);
 
                     TempData["BasariliMesaj"] = "Şifreniz başarıyla güncellendi.";
-                    // Şifre değişince genelde tekrar giriş yapılması istenir ama 
-                    // şimdilik sayfada kalsın istiyorsan:
                     return RedirectToAction("MyProfile");
                 }
                 else
                 {
-                    // Şifre kurallara uymuyorsa (çok kısaysa vs.)
                     foreach (var error in result.Errors)
                     {
                         ModelState.AddModelError("", error.Description);
@@ -101,9 +96,9 @@ namespace SinavPortaliFinal.Controllers
                 }
             }
 
-            // Eğer şifre boşsa hiçbir şey yapmadan sayfayı yenile
             return RedirectToAction("MyProfile");
         }
+
         // ==========================================
         //          SINAV EKRANI (GET)
         // ==========================================
@@ -112,16 +107,13 @@ namespace SinavPortaliFinal.Controllers
         {
             var user = await _userManager.GetUserAsync(User);
 
-            // --- DÜZELTME BURASI ---
-            // Eğer kullanıcı oturumu düşmüşse veya bulunamazsa Login'e gönder
+            // Eğer kullanıcı oturumu düşmüşse Login'e gönder
             if (user == null)
             {
                 return RedirectToAction("Index", "Login");
             }
-            // -----------------------
 
-            // --- GÜVENLİK KONTROLÜ ---
-            // Artık user'ın dolu olduğundan eminiz, user.Id kullanabiliriz.
+            // --- GÜVENLİK KONTROLÜ 1: Daha önce girmiş mi? ---
             var existingResult = _context.ExamResults.FirstOrDefault(x => x.ExamId == id && x.AppUserId == user.Id);
 
             if (existingResult != null)
@@ -129,14 +121,34 @@ namespace SinavPortaliFinal.Controllers
                 // Eğer girmişse, direkt sonuç sayfasına yönlendir
                 return View("Result", existingResult);
             }
-            // -------------------------
 
+            // Sınavı getir
             var exam = _context.Exams
                                .Include(x => x.Questions)
                                .Include(x => x.Category)
                                .FirstOrDefault(x => x.Id == id);
 
             if (exam == null) return RedirectToAction("Index");
+
+            // ===============================================
+            //        TARİH ARALIĞI KONTROLÜ (YENİ EKLENDİ)
+            // ===============================================
+            var simdi = DateTime.Now;
+
+            // 1. Sınav henüz başlamadıysa
+            if (simdi < exam.StartDate)
+            {
+                TempData["Hata"] = $"Sınav henüz başlamadı! Başlangıç: {exam.StartDate.ToString("dd.MM.yyyy HH:mm")}";
+                return RedirectToAction("Index");
+            }
+
+            // 2. Sınav süresi bittiyse
+            if (simdi > exam.EndDate)
+            {
+                TempData["Hata"] = $"Sınav süresi doldu! Bitiş: {exam.EndDate.ToString("dd.MM.yyyy HH:mm")}";
+                return RedirectToAction("Index");
+            }
+            // ===============================================
 
             return View(exam);
         }
@@ -169,7 +181,6 @@ namespace SinavPortaliFinal.Controllers
                 {
                     string verilenCevap = answers[question.Id];
 
-                    // Cevap doğru mu?
                     if (verilenCevap == question.CorrectAnswer)
                     {
                         dogruSayisi++;
@@ -181,13 +192,11 @@ namespace SinavPortaliFinal.Controllers
                 }
                 else
                 {
-                    // Boş bırakılan soruları yanlış sayabiliriz veya boş geçebiliriz
                     yanlisSayisi++;
                 }
             }
 
-            // 4. Puan Hesapla (Basit Yüzdelik)
-            // (Doğru / Toplam Soru) * 100
+            // 4. Puan Hesapla
             int toplamSoru = exam.Questions.Count;
             int puan = 0;
             if (toplamSoru > 0)
@@ -209,7 +218,7 @@ namespace SinavPortaliFinal.Controllers
             _context.ExamResults.Add(result);
             await _context.SaveChangesAsync();
 
-            // 6. Sonuç Ekranına Gönder (Model olarak sonucu taşıyoruz)
+            // 6. Sonuç Ekranına Gönder
             return View("Result", result);
         }
     }

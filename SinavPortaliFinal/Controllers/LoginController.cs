@@ -55,9 +55,10 @@ namespace SinavPortaliFinal.Controllers
             return RedirectToAction("Index");
         }
 
+        [HttpGet]
         public IActionResult AccessDenied()
         {
-            return Content("Bu sayfaya erişim yetkiniz yok! (Access Denied)");
+            return View();
         }
 
         // --- İLK KURULUM İÇİN SİHİRLİ METOT ---
@@ -92,6 +93,7 @@ namespace SinavPortaliFinal.Controllers
             }
 
             return Content("Demo Kullanıcılar Oluşturuldu! Giriş yapabilirsiniz.");
+
         }
     }
 }

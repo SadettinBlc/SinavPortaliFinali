@@ -40,8 +40,18 @@
                 </table>
 
                 <div class="d-grid gap-2">
-                    <button class="btn btn-success p-3 fw-bold">Değişiklikleri Kaydet</button>
-                    <a href="/Admin/Index" class="btn btn-outline-secondary">İptal</a>
+                    <button class="btn btn-success fw-bold py-2">
+                        Değişiklikleri Kaydet
+                    </button>
+
+                    @if (ViewBag.IsStudent == true)
+                    {
+                        <a href="/Admin/Students" class="btn btn-outline-secondary">İptal</a>
+                    }
+                    else
+                    {
+                        <a href="/Admin/Users" class="btn btn-outline-secondary">İptal</a>
+                    }
                 </div>
             </form>
         </div>

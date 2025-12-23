@@ -9,9 +9,8 @@
         <span class="text-muted"><i class="fa-solid fa-calendar-day me-2"></i>@DateTime.Now.ToShortDateString()</span>
     </div>
 
-    <div class="row g-3 row-cols-1 row-cols-md-2 row-cols-xl-5">
-
-        <div class="col">
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
             <div class="card text-white bg-primary h-100 shadow-sm border-0">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
@@ -33,13 +32,13 @@
             </div>
         </div>
 
-        <div class="col">
+        <div class="col-md-4">
             <div class="card text-white bg-success h-100 shadow-sm border-0">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <h6 class="text-uppercase mb-1 small opacity-75">Sınavlar</h6>
-                            <h2 class="fw-bold mb-0">@ViewBag.ExamCount</h2>
+                            <h2 class="fw-bold mb-0" id="examCount">@ViewBag.ExamCount</h2>
                         </div>
                         <i class="fa-solid fa-pen-to-square fa-2x opacity-50"></i>
                     </div>
@@ -48,7 +47,7 @@
             </div>
         </div>
 
-        <div class="col">
+        <div class="col-md-4">
             <div class="card text-white bg-warning h-100 shadow-sm border-0">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
@@ -62,14 +61,17 @@
                 <a href="/Admin/Exams" class="card-footer text-white bg-transparent border-0 text-end small">Sınavlar Üzerinden Gidiniz <i class="fa-solid fa-arrow-right"></i></a>
             </div>
         </div>
+    </div>
 
-        <div class="col">
+    <div class="row g-3">
+
+        <div class="col-md-4">
             <div class="card text-white bg-info h-100 shadow-sm border-0">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <h6 class="text-uppercase mb-1 small opacity-75">Öğrenciler</h6>
-                            <h2 class="fw-bold mb-0">@ViewBag.StudentCount</h2>
+                            <h2 class="fw-bold mb-0" id="studentCount">@ViewBag.StudentCount</h2>
                         </div>
                         <i class="fa-solid fa-user-graduate fa-2x opacity-50"></i>
                     </div>
@@ -78,7 +80,24 @@
             </div>
         </div>
 
-        <div class="col">
+        <div class="col-md-4">
+            <div class="card text-white bg-dark h-100 shadow-sm border-0">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase mb-1 small opacity-75">Notlar / Sonuçlar</h6>
+                            <h2 class="fw-bold mb-0">@ViewBag.ResultCount</h2>
+                        </div>
+                        <i class="fa-solid fa-square-poll-vertical fa-2x opacity-50"></i>
+                    </div>
+                </div>
+                <a href="/Admin/ExamResults" class="card-footer text-white bg-transparent border-0 text-end small">
+                    Listeyi Gör <i class="fa-solid fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+
+        <div class="col-md-4">
             <div class="card text-white bg-danger h-100 shadow-sm border-0">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
@@ -99,6 +118,13 @@
                 }
             </div>
         </div>
-
     </div>
 </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.1/signalr.js"></script>
+<script>
+    var connection = new signalR.HubConnectionBuilder().withUrl("/dashboardHub").build();
+    connection.start().then(function () { console.log("SignalR Bağlandı!"); }).catch(function (err) { return console.error(err.toString()); });
+    connection.on("ReceiveExamCount", function (count) { var elem = document.getElementById("examCount"); if(elem) elem.innerText = count; });
+    connection.on("ReceiveStudentCount", function (count) { var elem = document.getElementById("studentCount"); if(elem) elem.innerText = count; });
+</script>

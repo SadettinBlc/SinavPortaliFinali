@@ -43,12 +43,32 @@
                         <div class="card-footer bg-transparent border-0 pb-3">
                             <div class="d-grid">
 
-                                @if (ViewBag.TakenExamIds != null && ((List<int>)ViewBag.TakenExamIds).Contains(item.Id))
+                                @{
+                                    var simdi = DateTime.Now;
+                                    bool sinavGirdiMi = (ViewBag.TakenExamIds != null && ((List<int>)ViewBag.TakenExamIds).Contains(item.Id));
+                                }
+
+                                @if (sinavGirdiMi)
                                 {
                                     <button class="btn btn-secondary fw-bold" disabled>
                                         <i class="fa fa-check-circle me-2"></i> Tamamlandı
                                     </button>
                                 }
+                                // 2. DURUM: HENÜZ BAŞLAMADI
+                                else if (simdi < item.StartDate)
+                                {
+                                    <button class="btn btn-warning fw-bold text-dark" disabled>
+                                        <i class="fa fa-clock me-2"></i> @item.StartDate.ToString("dd MMM HH:mm")
+                                    </button>
+                                }
+                                // 3. DURUM: SÜRESİ BİTTİ
+                                else if (simdi > item.EndDate)
+                                {
+                                    <button class="btn btn-danger fw-bold" disabled>
+                                        <i class="fa fa-times-circle me-2"></i> Süre Doldu
+                                    </button>
+                                }
+                                // 4. DURUM: SINAV AKTİF (GİREBİLİR)
                                 else
                                 {
                                     <a href="/Student/JoinExam/@item.Id" class="btn btn-success fw-bold">

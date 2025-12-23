@@ -1,0 +1,38 @@
+﻿@{
+    ViewData["Title"] = "Erişim Engellendi";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="d-flex align-items-center justify-content-center" style="height: 70vh;">
+    <div class="text-center">
+        <div class="mb-4">
+            <i class="fa-solid fa-ban text-danger" style="font-size: 8rem;"></i>
+        </div>
+
+        <h1 class="display-4 fw-bold text-dark">403 - Erişim Engellendi</h1>
+
+        <p class="lead text-muted mb-4">
+            Üzgünüz, bu sayfayı görüntüleme yetkiniz bulunmamaktadır.<br>
+            Lütfen yöneticinizle iletişime geçin veya ana sayfaya dönün.
+        </p>
+
+        <div class="d-flex justify-content-center gap-3">
+            <a href="javascript:history.back()" class="btn btn-outline-secondary px-4">
+                <i class="fa-solid fa-arrow-left me-2"></i>Geri Dön
+            </a>
+
+            @if (User.IsInRole("Öğrenci"))
+            {
+                <a href="/Student/Index" class="btn btn-primary px-4">
+                    <i class="fa-solid fa-house me-2"></i>Ana Sayfa
+                </a>
+            }
+            else
+            {
+                <a href="/Admin/Index" class="btn btn-primary px-4">
+                    <i class="fa-solid fa-house me-2"></i>Ana Sayfa
+                </a>
+            }
+        </div>
+    </div>
+</div>

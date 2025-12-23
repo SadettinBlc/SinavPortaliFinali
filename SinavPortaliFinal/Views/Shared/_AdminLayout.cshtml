@@ -11,8 +11,13 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width" />
     <title>@ViewData["Title"] - Sınav Portalı</title>
+
+    <link rel="icon" type="image/x-icon" href="https://cdn-icons-png.flaticon.com/512/2997/2997235.png">
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
 
     <style>
         body {
@@ -63,6 +68,17 @@
             padding: 30px;
         }
 
+        /* Sidebar Profil Resmi Stili */
+        .sidebar-user-img {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #6c757d;
+            margin-right: 10px;
+        }
+
+        /* Üst Menü Profil Resmi */
         .profile-img-small {
             width: 35px;
             height: 35px;
@@ -117,7 +133,7 @@
 
                 @if (User.IsInRole("Müdür") || User.IsInRole("Öğretmen"))
                 {
-                    <li><a href="/Admin/Index"><i class="fa-solid fa-gauge me-2"></i>Dashboard</a></li>
+                    <li><a href="/Admin/Index"><i class="fa-solid fa-gauge me-2"></i>Anasayfa</a></li>
 
                     @if (User.IsInRole("Müdür"))
                     {
@@ -127,6 +143,13 @@
                     <li><a href="/Admin/Exams"><i class="fa-solid fa-pen-to-square me-2"></i>Sınavlar</a></li>
                     <li><a href="/Admin/Students"><i class="fa-solid fa-user-graduate me-2"></i>Öğrenciler</a></li>
                     <li><a href="/Admin/ExamResults"><i class="fa-solid fa-chart-line me-2"></i>Notlar</a></li>
+
+                    <li>
+                        <a href="@(User.IsInRole("Öğrenci") ? "/Student/MyProfile" : "/Admin/MyProfile")" class="d-flex align-items-center text-decoration-none">
+                            <img src="@(user?.ProfileImageUrl ?? "/img/default-user.png")" class="sidebar-user-img">
+                            <span>Profilim</span>
+                        </a>
+                    </li>
 
                     @if (User.IsInRole("Müdür"))
                     {
@@ -143,15 +166,15 @@
                         </a>
                     </li>
                     <li>
+                        <a href="/Student/MyGrades">
+                            <i class="fa-solid fa-star me-2"></i>Notlarım
+                        </a>
+                    </li>
+                    <li>
                         <a href="/Student/MyProfile">
                             <i class="fa-solid fa-id-card me-2"></i>Profilim
                         </a>
                     </li>
-                    <li>
-    <a href="/Admin/ExamResults">
-        <i class="fa-solid fa-chart-line me-2"></i>Notlar
-    </a>
-</li>
                 }
 
             </ul>
@@ -162,12 +185,33 @@
         </div>
     </div>
 
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
 
     <script>
         $(document).ready(function () {
+
+            // --- DATATABLES AYARI ---
+            // Sayfada tablo varsa onu akıllı hale getir
+            if ($('.table').length > 0) {
+                $('.table').DataTable({
+                    "language": {
+                        "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/tr.json"
+                    },
+                    "pageLength": 10,
+                    "lengthChange": false,
+                    "ordering": false,
+                    "searching": true
+                });
+            }
+
+            // --- SİLME BUTONU (AJAX) ---
             $(document).on('click', '.btn-sil', function () {
                 var btn = $(this);
                 var id = btn.data("id");
@@ -192,7 +236,12 @@
                             success: function (response) {
                                 if (response.success) {
                                     Swal.fire('Silindi!', 'Kayıt başarıyla silindi.', 'success');
-                                    row.fadeOut(500, function () { $(this).remove(); });
+                                    // Eğer DataTable kullanıyorsak satırı tablodan da silelim
+                                    if($.fn.DataTable.isDataTable('.table')){
+                                        $('.table').DataTable().row(row).remove().draw();
+                                    } else {
+                                        row.fadeOut(500, function () { $(this).remove(); });
+                                    }
                                 } else {
                                     Swal.fire('Hata!', 'Silme işlemi başarısız.', 'error');
                                 }
@@ -204,6 +253,7 @@
                     }
                 });
             });
+
         });
     </script>
 </body>

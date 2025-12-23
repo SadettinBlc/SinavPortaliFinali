@@ -6,6 +6,37 @@
 }
 
 <div class="container-fluid mt-4">
+
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body py-3">
+            <form action="/Admin/ExamResults" method="get" class="row align-items-center">
+                <div class="col-auto">
+                    <label class="fw-bold text-secondary"><i class="fa fa-filter me-2"></i>Sınava Göre Filtrele:</label>
+                </div>
+                <div class="col-md-4">
+                    <select name="examId" class="form-select border-primary" onchange="this.form.submit()">
+                        <option value="">Tüm Sınavları Göster</option>
+
+                        @if (ViewBag.Exams != null)
+                        {
+                            foreach (var item in (List<SinavPortaliFinal.Models.Exam>)ViewBag.Exams)
+                            {
+                                // Eğer bu sınav seçiliyse, kutuda seçili gelsin
+                                if (ViewBag.SelectedExamId == item.Id)
+                                {
+                                    <option value="@item.Id" selected>@item.Title</option>
+                                }
+                                else
+                                {
+                                    <option value="@item.Id">@item.Title</option>
+                                }
+                            }
+                        }
+                    </select>
+                </div>
+            </form>
+        </div>
+    </div>
     <div class="card shadow border-0">
         <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
             <h5 class="mb-0"><i class="fa fa-chart-bar me-2"></i>Sınav Sonuçları / Notlar</h5>
@@ -24,7 +55,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @if (Model.Count > 0)
+                    @if (Model != null && Model.Count > 0)
                     {
                         foreach (var item in Model)
                         {
@@ -35,7 +66,7 @@
                                     @(item.AppUser?.Name ?? "Silinmiş") @(item.AppUser?.Surname ?? "Öğrenci")
                                 </td>
                                 <td><span class="badge bg-info text-dark">@(item.Exam?.Category?.Name ?? "Silinmiş Ders")</span></td>
-                                <td>@@(item.Exam?.Title ?? "Silinmiş Sınav")</td>
+                                <td>@(item.Exam?.Title ?? "Silinmiş Sınav")</td>
                                 <td class="text-center">
                                     <span class="text-success fw-bold">@item.CorrectCount D</span> /
                                     <span class="text-danger fw-bold">@item.WrongCount Y</span>
@@ -52,12 +83,6 @@
                                 </td>
                             </tr>
                         }
-                    }
-                    else
-                    {
-                        <tr>
-                            <td colspan="6" class="text-center py-4 text-muted">Henüz sınav sonucu bulunmamaktadır.</td>
-                        </tr>
                     }
                 </tbody>
             </table>

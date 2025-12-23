@@ -22,8 +22,20 @@ builder.Services.AddIdentity<AppUser, AppRole>(options =>
 // REPOSITORY SERVÝSLERÝ
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
+// --- YETKÝ AYARLARI ---
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    // Giriþ yapmamýþsa buraya gitsin
+    options.LoginPath = "/Login/Index";
+
+    // !!! BURASI ÖNEMLÝ: Yetkisi yoksa buraya gitsin !!!
+    options.AccessDeniedPath = "/Login/AccessDenied";
+});
+
 // 3. MVC
 builder.Services.AddControllersWithViews();
+
+builder.Services.AddSignalR(); // 1. Servisi Ekle
 
 var app = builder.Build();
 
@@ -42,6 +54,7 @@ app.UseRouting();
 app.UseAuthentication(); // Kimlik Kontrolü
 app.UseAuthorization();  // Yetki Kontrolü
 
+app.MapHub<SinavPortaliFinal.Hubs.DashboardHub>("/dashboardHub"); // 2. Yolu Tanýt
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Login}/{action=Index}/{id?}");

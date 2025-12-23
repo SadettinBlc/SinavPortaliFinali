@@ -12,6 +12,10 @@ namespace SinavPortaliFinal.Models
         [Display(Name = "Sınav Başlığı")]
         public string Title { get; set; } = "";
 
+        [Display(Name = "Sınav Tarihi")]
+        public DateTime StartDate { get; set; } // Başlangıç (Örn: 25.12.2023 10:00)
+        public DateTime EndDate { get; set; }
+
         [Display(Name = "Süre (Dakika)")]
         public int Duration { get; set; }
 
