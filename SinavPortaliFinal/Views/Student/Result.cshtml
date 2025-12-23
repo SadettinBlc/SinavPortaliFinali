@@ -1,0 +1,44 @@
+﻿@model SinavPortaliFinal.Models.ExamResult
+
+@{
+    ViewData["Title"] = "Sınav Sonucu";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+
+    // Puana göre renk ve mesaj belirleyelim
+    string cardClass = Model.Score >= 50 ? "bg-success" : "bg-danger";
+    string icon = Model.Score >= 50 ? "fa-trophy" : "fa-circle-xmark";
+    string mesaj = Model.Score >= 50 ? "Tebrikler, Başardınız!" : "Maalesef Kaldınız.";
+}
+
+<div class="container mt-5 text-center" style="max-width: 600px;">
+
+    <div class="card shadow-lg border-0">
+        <div class="card-header @cardClass text-white py-4">
+            <i class="fa-solid @icon fa-4x mb-2"></i>
+            <h2 class="fw-bold">@mesaj</h2>
+        </div>
+
+        <div class="card-body p-5">
+            <h5 class="text-muted text-uppercase small ls-2">Sınav Puanınız</h5>
+            <h1 class="display-1 fw-bold my-3 text-dark">@Model.Score</h1>
+
+            <div class="row justify-content-center mt-4">
+                <div class="col-4 border-end">
+                    <h4 class="text-success fw-bold">@Model.CorrectCount</h4>
+                    <small class="text-muted">Doğru</small>
+                </div>
+                <div class="col-4">
+                    <h4 class="text-danger fw-bold">@Model.WrongCount</h4>
+                    <small class="text-muted">Yanlış</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-footer bg-white border-0 pb-4">
+            <a href="/Student/Index" class="btn btn-outline-primary px-4 py-2 fw-bold rounded-pill">
+                <i class="fa fa-arrow-left me-2"></i> Sınavlara Dön
+            </a>
+        </div>
+    </div>
+
+</div>

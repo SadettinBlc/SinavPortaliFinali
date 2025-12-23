@@ -1,0 +1,66 @@
+﻿@model List<SinavPortaliFinal.Models.ExamResult>
+
+@{
+    ViewData["Title"] = "Sınav Notları";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid mt-4">
+    <div class="card shadow border-0">
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="fa fa-chart-bar me-2"></i>Sınav Sonuçları / Notlar</h5>
+            <span class="badge bg-light text-dark">Toplam: @Model.Count Kayıt</span>
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-hover table-striped mb-0 align-middle">
+                <thead class="table-secondary">
+                    <tr>
+                        <th>Tarih</th>
+                        <th>Öğrenci</th>
+                        <th>Ders</th>
+                        <th>Sınav</th>
+                        <th class="text-center">Doğru / Yanlış</th>
+                        <th class="text-center">Puan</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Count > 0)
+                    {
+                        foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@item.Date.ToShortDateString() <small class="text-muted">@item.Date.ToShortTimeString()</small></td>
+                                <td class="fw-bold">
+                                    <img src="@(item.AppUser?.ProfileImageUrl ?? "/img/default-user.png")" width="30" class="rounded-circle me-2">
+                                    @(item.AppUser?.Name ?? "Silinmiş") @(item.AppUser?.Surname ?? "Öğrenci")
+                                </td>
+                                <td><span class="badge bg-info text-dark">@(item.Exam?.Category?.Name ?? "Silinmiş Ders")</span></td>
+                                <td>@@(item.Exam?.Title ?? "Silinmiş Sınav")</td>
+                                <td class="text-center">
+                                    <span class="text-success fw-bold">@item.CorrectCount D</span> /
+                                    <span class="text-danger fw-bold">@item.WrongCount Y</span>
+                                </td>
+                                <td class="text-center">
+                                    @if (item.Score >= 50)
+                                    {
+                                        <span class="badge bg-success fs-6">@item.Score</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger fs-6">@item.Score</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center py-4 text-muted">Henüz sınav sonucu bulunmamaktadır.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

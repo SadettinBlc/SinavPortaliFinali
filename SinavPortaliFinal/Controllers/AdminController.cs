@@ -531,5 +531,43 @@ namespace SinavPortaliFinal.Controllers
             await _context.SaveChangesAsync();
             return RedirectToAction("Index");
         }
+        // ==========================================
+        //          NOTLAR / SINAV SONUÇLARI
+        // ==========================================
+        public IActionResult ExamResults()
+        {
+            // Tüm sonuçları getir (Öğrenci, Sınav ve Ders bilgileriyle)
+            var results = _context.ExamResults
+                                  .Include(x => x.AppUser)
+                                  .Include(x => x.Exam)
+                                  // DÜZELTME 1: e!.Category diyerek "Boş olsa da devam et" diyoruz
+                                  .ThenInclude(e => e!.Category)
+                                  .OrderByDescending(x => x.Date)
+                                  .ToList();
+
+            // 1. MÜDÜR İSE -> Hepsini görsün
+            if (User.IsInRole("Müdür"))
+            {
+                return View(results);
+            }
+
+            // 2. ÖĞRETMEN İSE -> Filtrele
+            if (User.IsInRole("Öğretmen"))
+            {
+                var teacherId = int.Parse(_userManager.GetUserId(User) ?? "0");
+
+                var teacherCategoryIds = _context.UserCategories
+                                                 .Where(x => x.AppUserId == teacherId)
+                                                 .Select(x => x.CategoryId)
+                                                 .ToList();
+
+                // DÜZELTME 2: r.Exam!.CategoryId diyerek ünlem koyduk
+                var myResults = results.Where(r => r.Exam != null && teacherCategoryIds.Contains(r.Exam!.CategoryId)).ToList();
+
+                return View(myResults);
+            }
+
+            return View(new List<ExamResult>());
+        }
     }
 }

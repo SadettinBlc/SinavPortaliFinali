@@ -42,9 +42,20 @@
 
                         <div class="card-footer bg-transparent border-0 pb-3">
                             <div class="d-grid">
-                                <a href="/Student/JoinExam/@item.Id" class="btn btn-success fw-bold">
-                                    <i class="fa fa-play me-2"></i> Sınava Başla
-                                </a>
+
+                                @if (ViewBag.TakenExamIds != null && ((List<int>)ViewBag.TakenExamIds).Contains(item.Id))
+                                {
+                                    <button class="btn btn-secondary fw-bold" disabled>
+                                        <i class="fa fa-check-circle me-2"></i> Tamamlandı
+                                    </button>
+                                }
+                                else
+                                {
+                                    <a href="/Student/JoinExam/@item.Id" class="btn btn-success fw-bold">
+                                        <i class="fa fa-play me-2"></i> Sınava Başla
+                                    </a>
+                                }
+
                             </div>
                         </div>
                     </div>

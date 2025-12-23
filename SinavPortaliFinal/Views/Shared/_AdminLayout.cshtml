@@ -125,8 +125,8 @@
                     }
 
                     <li><a href="/Admin/Exams"><i class="fa-solid fa-pen-to-square me-2"></i>Sınavlar</a></li>
-                    <li><a href="/Admin/Exams"><i class="fas fa-circle-question me-2"></i>Sorular</a></li>
                     <li><a href="/Admin/Students"><i class="fa-solid fa-user-graduate me-2"></i>Öğrenciler</a></li>
+                    <li><a href="/Admin/ExamResults"><i class="fa-solid fa-chart-line me-2"></i>Notlar</a></li>
 
                     @if (User.IsInRole("Müdür"))
                     {
@@ -147,6 +147,11 @@
                             <i class="fa-solid fa-id-card me-2"></i>Profilim
                         </a>
                     </li>
+                    <li>
+    <a href="/Admin/ExamResults">
+        <i class="fa-solid fa-chart-line me-2"></i>Notlar
+    </a>
+</li>
                 }
 
             </ul>

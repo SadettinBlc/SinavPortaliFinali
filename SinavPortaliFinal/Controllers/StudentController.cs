@@ -24,25 +24,31 @@ namespace SinavPortaliFinal.Controllers
         // ==========================================
         public async Task<IActionResult> Index()
         {
-            // 1. Giriş yapan öğrenciyi bul
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return RedirectToAction("Login", "Account");
 
-            // 2. Bu öğrenciye atanan derslerin ID'lerini bul (UserCategory tablosundan)
+            // 1. Öğrenciye atanan dersleri bul
             var assignedCategoryIds = _context.UserCategories
                                               .Where(uc => uc.AppUserId == user.Id)
                                               .Select(uc => uc.CategoryId)
                                               .ToList();
 
-            // 3. Sadece bu derslere ait sınavları getir
-            // (Include ile ders adını da çekiyoruz ki ekranda yazabilelim)
+            // 2. Bu derslerin sınavlarını getir
             var myExams = _context.Exams
                                   .Include(x => x.Category)
                                   .Where(exam => assignedCategoryIds.Contains(exam.CategoryId))
                                   .ToList();
 
-            // 4. Öğrencinin daha önce girdiği sınav sonuçlarını da çekelim (İleride kullanacağız)
-            // Bu kısım şimdilik sadece sınav listesi için yeterli.
+            // 3. --- YENİ KISIM ---
+            // Öğrencinin daha önce girdiği sınavların ID'lerini buluyoruz
+            var takenExamIds = _context.ExamResults
+                                       .Where(x => x.AppUserId == user.Id)
+                                       .Select(x => x.ExamId)
+                                       .ToList();
+
+            // Bu listeyi View tarafına gönderiyoruz ki butonu değiştirelim
+            ViewBag.TakenExamIds = takenExamIds;
+            // ---------------------
 
             return View(myExams);
         }
@@ -102,19 +108,35 @@ namespace SinavPortaliFinal.Controllers
         //          SINAV EKRANI (GET)
         // ==========================================
         [HttpGet]
-        public IActionResult JoinExam(int id)
+        public async Task<IActionResult> JoinExam(int id)
         {
-            // 1. Sınavı ve SORULARINI çekiyoruz (Include şart!)
+            var user = await _userManager.GetUserAsync(User);
+
+            // --- DÜZELTME BURASI ---
+            // Eğer kullanıcı oturumu düşmüşse veya bulunamazsa Login'e gönder
+            if (user == null)
+            {
+                return RedirectToAction("Index", "Login");
+            }
+            // -----------------------
+
+            // --- GÜVENLİK KONTROLÜ ---
+            // Artık user'ın dolu olduğundan eminiz, user.Id kullanabiliriz.
+            var existingResult = _context.ExamResults.FirstOrDefault(x => x.ExamId == id && x.AppUserId == user.Id);
+
+            if (existingResult != null)
+            {
+                // Eğer girmişse, direkt sonuç sayfasına yönlendir
+                return View("Result", existingResult);
+            }
+            // -------------------------
+
             var exam = _context.Exams
-                               .Include(x => x.Questions) // Soruları da getir
-                               .Include(x => x.Category)  // Ders adını da getir
+                               .Include(x => x.Questions)
+                               .Include(x => x.Category)
                                .FirstOrDefault(x => x.Id == id);
 
-            // 2. Sınav yoksa ana sayfaya at
-            if (exam == null)
-            {
-                return RedirectToAction("Index");
-            }
+            if (exam == null) return RedirectToAction("Index");
 
             return View(exam);
         }
@@ -125,9 +147,70 @@ namespace SinavPortaliFinal.Controllers
         [HttpPost]
         public async Task<IActionResult> FinishExam(int examId, Dictionary<int, string> answers)
         {
-            // BU KISMI BİR SONRAKİ ADIMDA KODLAYACAĞIZ
-            // Şimdilik sadece "Sınav Bitti" desin yeter.
-            return Content("Sınav bitti! Cevaplarınız alındı. Puanlama sistemi bir sonraki adımda yapılacak.");
+            // 1. Giriş yapan öğrenciyi bul
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return RedirectToAction("Login", "Account");
+
+            // 2. Sınavı ve Doğru Cevapları Çek
+            var exam = _context.Exams
+                               .Include(x => x.Questions)
+                               .FirstOrDefault(x => x.Id == examId);
+
+            if (exam == null) return RedirectToAction("Index");
+
+            // 3. Puanlama Mantığı
+            int dogruSayisi = 0;
+            int yanlisSayisi = 0;
+
+            foreach (var question in exam.Questions)
+            {
+                // Öğrenci bu soruya cevap vermiş mi?
+                if (answers.ContainsKey(question.Id))
+                {
+                    string verilenCevap = answers[question.Id];
+
+                    // Cevap doğru mu?
+                    if (verilenCevap == question.CorrectAnswer)
+                    {
+                        dogruSayisi++;
+                    }
+                    else
+                    {
+                        yanlisSayisi++;
+                    }
+                }
+                else
+                {
+                    // Boş bırakılan soruları yanlış sayabiliriz veya boş geçebiliriz
+                    yanlisSayisi++;
+                }
+            }
+
+            // 4. Puan Hesapla (Basit Yüzdelik)
+            // (Doğru / Toplam Soru) * 100
+            int toplamSoru = exam.Questions.Count;
+            int puan = 0;
+            if (toplamSoru > 0)
+            {
+                puan = (int)((double)dogruSayisi / toplamSoru * 100);
+            }
+
+            // 5. Sonucu Veritabanına Kaydet
+            var result = new ExamResult
+            {
+                AppUserId = user.Id,
+                ExamId = examId,
+                CorrectCount = dogruSayisi,
+                WrongCount = yanlisSayisi,
+                Score = puan,
+                Date = DateTime.Now
+            };
+
+            _context.ExamResults.Add(result);
+            await _context.SaveChangesAsync();
+
+            // 6. Sonuç Ekranına Gönder (Model olarak sonucu taşıyoruz)
+            return View("Result", result);
         }
     }
 }
