@@ -4,6 +4,6 @@ namespace SinavPortaliFinal.Models
 {
     public class AppRole : IdentityRole<int>
     {
-        // Ekstra bir şeye gerek yok, standart rol yapısı.
+        // Standart rol yapısı.
     }
 }

@@ -4,7 +4,7 @@ namespace SinavPortaliFinal.Repositories
 {
     public interface IGenericRepository<T> where T : class
     {
-        List<T> GetAll(string? p = null); // İlişkili tablo getirme özelliğiyle
+        List<T> GetAll(string? p = null); // İlişkili tablo getirme özelliği
         List<T> GetListByFilter(Expression<Func<T, bool>> filter, string? p = null); // Filtreleme
         T GetById(int id);
         void Add(T entity);

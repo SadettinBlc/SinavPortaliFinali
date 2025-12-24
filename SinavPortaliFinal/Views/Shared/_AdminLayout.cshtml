@@ -233,7 +233,7 @@
                             success: function (response) {
                                 if (response.success) {
                                     Swal.fire('Silindi!', 'Kayıt başarıyla silindi.', 'success');
-                                    // Eğer DataTable kullanıyorsak satırı tablodan da silelim
+                                    // Eğer DataTable kullanıyorsan sil
                                     if($.fn.DataTable.isDataTable('.table')){
                                         $('.table').DataTable().row(row).remove().draw();
                                     } else {

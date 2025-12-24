@@ -19,9 +19,8 @@ namespace SinavPortaliFinal.Controllers
             _context = context;
         }
 
-        // ==========================================
         //       ÖĞRENCİ ANA SAYFASI (SINAVLAR)
-        // ==========================================
+
         public async Task<IActionResult> Index()
         {
             var user = await _userManager.GetUserAsync(User);
@@ -51,9 +50,8 @@ namespace SinavPortaliFinal.Controllers
             return View(myExams);
         }
 
-        // ==========================================
         //           PROFİLİM SAYFASI
-        // ==========================================
+
         [HttpGet]
         public async Task<IActionResult> MyProfile()
         {
@@ -99,9 +97,8 @@ namespace SinavPortaliFinal.Controllers
             return RedirectToAction("MyProfile");
         }
 
-        // ==========================================
         //          SINAV EKRANI (GET)
-        // ==========================================
+
         [HttpGet]
         public async Task<IActionResult> JoinExam(int id)
         {
@@ -113,7 +110,7 @@ namespace SinavPortaliFinal.Controllers
                 return RedirectToAction("Index", "Login");
             }
 
-            // --- GÜVENLİK KONTROLÜ 1: Daha önce girmiş mi? ---
+            // --- GÜVENLİK KONTROLÜ 1: Daha önce girmiş mi? 
             var existingResult = _context.ExamResults.FirstOrDefault(x => x.ExamId == id && x.AppUserId == user.Id);
 
             if (existingResult != null)
@@ -130,9 +127,7 @@ namespace SinavPortaliFinal.Controllers
 
             if (exam == null) return RedirectToAction("Index");
 
-            // ===============================================
-            //        TARİH ARALIĞI KONTROLÜ (YENİ EKLENDİ)
-            // ===============================================
+            //        TARİH ARALIĞI KONTROLÜ 
             var simdi = DateTime.Now;
 
             // 1. Sınav henüz başlamadıysa
@@ -153,9 +148,8 @@ namespace SinavPortaliFinal.Controllers
             return View(exam);
         }
 
-        // ==========================================
         //      SINAVI BİTİRME / PUANLAMA (POST)
-        // ==========================================
+
         [HttpPost]
         public async Task<IActionResult> FinishExam(int examId, Dictionary<int, string> answers)
         {

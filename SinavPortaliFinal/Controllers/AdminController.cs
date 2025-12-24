@@ -36,9 +36,9 @@ namespace SinavPortaliFinal.Controllers
             _hubContext = hubContext;
         }
 
-        // ==========================================
+
         //             DASHBOARD (ANA SAYFA)
-        // ==========================================
+
         public async Task<IActionResult> Index()
         {
             // --- ORTAK HESAPLAMA (Müdür de Öğretmen de Personel Sayısını Görsün) ---
@@ -63,7 +63,7 @@ namespace SinavPortaliFinal.Controllers
                 ViewBag.ResultCount = _context.ExamResults.Count();
 
                 ViewBag.StudentCount = totalStudentCount;
-                ViewBag.StaffCount = totalStaffCount; // Hesapladığımız sayıyı buraya veriyoruz
+                ViewBag.StaffCount = totalStaffCount; 
             }
             // ÖĞRETMEN İSE: Sadece kendi verilerini görsün
             else if (User.IsInRole("Öğretmen"))
@@ -100,17 +100,16 @@ namespace SinavPortaliFinal.Controllers
                 ViewBag.StudentCount = myStudentCount;
 
                 // 6. Personel Sayısı (DÜZELTİLDİ)
-                // Artık 0 yerine gerçek personel sayısını görüyorlar
+
                 ViewBag.StaffCount = totalStaffCount;
             }
 
             return View();
         }
 
-        // ==========================================
         //      1. DERS (KATEGORİ) İŞLEMLERİ
         //      (SADECE MÜDÜR YÖNETEBİLİR)
-        // ==========================================
+
         [Authorize(Roles = "Müdür")]
         public IActionResult Categories() => View(_categoryRepo.GetAll());
 
@@ -146,10 +145,8 @@ namespace SinavPortaliFinal.Controllers
             return Json(new { success = true });
         }
 
-        // ==========================================
         //             2. SINAV İŞLEMLERİ
         //      (Öğretmen sadece kendi sınavını görür)
-        // ==========================================
         public IActionResult Exams()
         {
             // Tüm sınavları ders bilgisiyle çek
@@ -242,9 +239,7 @@ namespace SinavPortaliFinal.Controllers
             return Json(new { success = true });
         }
 
-        // ==========================================
         //             3. SORU İŞLEMLERİ
-        // ==========================================
         public IActionResult Questions(int? examId)
         {
             // Eğer ID gelmediyse (link bozuksa vs) Sınavlar sayfasına geri at
@@ -258,12 +253,12 @@ namespace SinavPortaliFinal.Controllers
 
             if (exam != null)
             {
-                ViewBag.ExamName = exam.Title; // Senin tabloda Name ise burayı exam.Name yap
+                ViewBag.ExamName = exam.Title; 
             }
 
             ViewBag.SelectedExamId = examId;
 
-            // SADECE bu sınava ait soruları filtreleyip gönderiyoruz
+            // Sadece bu sınava ait soruları filtreleyip gönderiyoruz
             var questions = _questionRepo.GetListByFilter(x => x.ExamId == examId, "Exam");
 
             return View(questions);
@@ -281,7 +276,7 @@ namespace SinavPortaliFinal.Controllers
 
             ViewBag.SelectedExamId = id;
 
-            // Sınavın adını bulup ekrana yazalım
+            // Sınavın adını bulup ekrana yaz
             var exam = _examRepo.GetById(id.Value);
             if (exam != null) ViewBag.ExamName = exam.Title;
 
@@ -320,9 +315,8 @@ namespace SinavPortaliFinal.Controllers
             return Json(new { success = true });
         }
 
-        // ==========================================
         //      4. PERSONEL YÖNETİMİ (Sadece Müdür)
-        // ==========================================
+
         [Authorize(Roles = "Müdür")]
         public IActionResult Users()
         {
@@ -394,10 +388,9 @@ namespace SinavPortaliFinal.Controllers
             return Json(new { success = false });
         }
 
-        // ==========================================
         //           5. ÖĞRENCİ YÖNETİMİ
         //    (Öğretmen Sadece Kendi Öğrencisini Görür)
-        // ==========================================
+
         public async Task<IActionResult> Students()
         {
             // 1. Tüm öğrencileri getir
@@ -459,9 +452,8 @@ namespace SinavPortaliFinal.Controllers
 
         [HttpGet] public async Task<IActionResult> UpdateStudent(string id) => View(await _userManager.FindByIdAsync(id));
 
-        // ==========================================
         //  ÖĞRENCİ DÜZENLEME (RESİM YÜKLEME EKLENDİ)
-        // ==========================================
+
         [HttpPost]
         public async Task<IActionResult> UpdateStudent(AppUser p, string? Password, IFormFile? file) // <-- file eklendi
         {
@@ -510,9 +502,8 @@ namespace SinavPortaliFinal.Controllers
             return Json(new { success = false });
         }
 
-        // ==========================================
         //             6. PROFİL İŞLEMLERİ
-        // ==========================================
+
         [HttpGet] public async Task<IActionResult> MyProfile() => View(await _userManager.GetUserAsync(User));
 
         [HttpPost]
@@ -553,9 +544,8 @@ namespace SinavPortaliFinal.Controllers
             return RedirectToAction("Index", "Login");
         }
 
-        // ==========================================
         //      DERS ATAMA EKRANI (SADECE MÜDÜR)
-        // ==========================================
+
         [Authorize(Roles = "Müdür")]
         [HttpGet]
         public async Task<IActionResult> AssignLesson(int id)
@@ -563,9 +553,6 @@ namespace SinavPortaliFinal.Controllers
             var user = await _userManager.FindByIdAsync(id.ToString());
             if (user == null) return NotFound();
 
-            // --- GARANTİ YÖNTEM ---
-            // Link adresi göndermek yerine direkt durumu (true/false) gönderiyoruz.
-            // Böylece View tarafında hata olma şansı kalmıyor.
             bool isStudent = await _userManager.IsInRoleAsync(user, "Öğrenci");
             ViewBag.IsStudent = isStudent;
             // ---------------------
@@ -643,20 +630,17 @@ namespace SinavPortaliFinal.Controllers
             }
         }
 
-        // ==========================================
         //          NOTLAR / SINAV SONUÇLARI
         //       (FİLTRELEME ÖZELLİĞİ EKLENDİ)
-        // ==========================================
         public IActionResult ExamResults(int? examId)
         {
-            // 1. Sorguyu Hazırla (Henüz veritabanına gitmiyoruz, şablonu kuruyoruz)
+            // 1. Sorguyu Hazırla (Şablon, Veritabanına gitmiyor)
             var query = _context.ExamResults
                                 .Include(x => x.AppUser)
                                 .Include(x => x.Exam)
                                 .ThenInclude(e => e!.Category)
                                 .AsQueryable();
 
-            // Dropdown (Seçim Kutusu) için sınav listesi hazırlayacağız
             List<Exam> dropdownExams = new List<Exam>();
 
             // 2. MÜDÜR İSE -> Tüm Sınavları Görebilir

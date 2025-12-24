@@ -61,7 +61,7 @@ namespace SinavPortaliFinal.Controllers
             return View();
         }
 
-        // --- İLK KURULUM İÇİN SİHİRLİ METOT ---
+        //  İLK KURULUM İÇİN METOT 
         public async Task<IActionResult> CreateDemo()
         {
             // 1. Rolleri Oluştur
